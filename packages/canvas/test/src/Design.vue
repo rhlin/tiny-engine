@@ -5,9 +5,9 @@
 </template>
 
 <script setup>
-import CanvasContainer from './index'
+import CanvasContainer from '../src/index'
 
-import formJSON from '../test/form.json'
+import formJSON from '../form.json'
 
 const controller = {
   getPageSchema() {

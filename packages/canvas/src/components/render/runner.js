@@ -13,7 +13,6 @@
 import { createApp } from 'vue'
 import { addScript, addStyle, dynamicImportComponents, updateDependencies } from '../common'
 import TinyI18nHost, { I18nInjectionKey } from '@opentiny/tiny-engine-controller/js/i18n'
-import { getGlobalConfig } from '@opentiny/tiny-engine-controller'
 import Main, { api } from './RenderMain'
 import lowcode from '../../lowcode'
 import { supportUmdBlock } from './supportUmdBlock'
@@ -30,9 +29,7 @@ const initRenderContext = () => {
   window.TinyLowcodeComponent = {}
   window.TinyComponentLibs = {}
 
-  if (getGlobalConfig().blockFormat === 'umd') {
-    supportUmdBlock()
-  }
+  supportUmdBlock()
 
   document.addEventListener('updateDependencies', updateDependencies)
 }

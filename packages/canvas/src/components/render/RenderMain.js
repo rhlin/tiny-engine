@@ -15,6 +15,8 @@ import { I18nInjectionKey } from 'vue-i18n'
 import { useBroadcastChannel } from '@vueuse/core'
 import { constants } from '@opentiny/tiny-engine-utils'
 import { generateFunction } from '@opentiny/tiny-engine-controller/utils'
+import * as TinyVueIcon from '@opentiny/vue-icon'
+import TinyVue from '@opentiny/vue'
 import renderer, { parseData, setConfigure, setController, globalNotify, isStateAccessor } from './render'
 import { getNode as getNodeById, clearNodes, getRoot, setContext, getContext, setCondition, context } from './context'
 import CanvasEmpty from './CanvasEmpty.vue'
@@ -65,13 +67,13 @@ const setUtils = (data, clear, isForceRefresh) => {
   const utilsCollection = {}
   // 目前画布还不具备远程加载utils工具类的功能，目前只能加载TinyVue组件库中的组件工具
   data?.forEach((item) => {
-    const util = window.TinyVue[item.content.exportName]
+    const util = TinyVue[item.content.exportName]
     if (util) {
       utilsCollection[item.name] = util
     }
 
     // 此处需要把工具类中的icon图标也加入utils上下文环境
-    const utilIcon = window.TinyVueIcon[item.content.exportName]
+    const utilIcon = TinyVueIcon[item.content.exportName]
     if (utilIcon) {
       utilsCollection[item.name] = utilIcon
     }

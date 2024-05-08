@@ -93,5 +93,7 @@ export default {
   platformId: 897,
 
   // 是否默认导入布局组件
-  defaultImportLayout: 1
+  defaultImportLayout: 1,
+  // 区块格式， 支持es和umd
+  blockFormat: 'es'
 }

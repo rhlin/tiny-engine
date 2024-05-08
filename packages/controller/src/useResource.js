@@ -139,7 +139,7 @@ const registerBlock = async (data, notFetchResouce) => {
     if (!blockResource.get(label)) {
       const { addScript, addStyle } = useCanvas().renderer.value
       const promises = scripts
-        .filter((item) => item.includes('umd.js'))
+        .filter((item) => item.endsWith(`${getGlobalConfig().blockFormat}.js`))
         .map(addScript)
         .concat(styles.map(addStyle))
       // 此处删除await，提前放行区块数据，在区块渲染前找到区块数据源映射关系

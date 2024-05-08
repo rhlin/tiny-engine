@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, normalizePath } from 'vite'
 
 import path from 'path'
 import vue from '@vitejs/plugin-vue'
@@ -128,6 +128,10 @@ const config = {
   }
 }
 
+const toFsPath = (absolutePath) => {
+  return '/@fs/' + normalizePath(absolutePath)
+}
+
 const importMapVersions = {
   prettier: '2.7.1',
   vue: '3.4.23',
@@ -234,31 +238,6 @@ export default defineConfig(({ command, mode }) => {
     }
   }
 
-  if (command === 'serve') {
-    const devVueAlias = {
-      find: /^vue$/,
-      replacement: `${VITE_CDN_DOMAIN}/vue@${importMapVersions.vue}/dist/vue.runtime.esm-browser.js`
-    }
-
-    config.resolve.alias = [
-      devVueAlias,
-      ...Object.entries({ ...commonAlias, ...devAlias }).map(([find, replacement]) => ({
-        find,
-        replacement
-      }))
-    ]
-  } else {
-    // command === 'build'
-    config.resolve.alias = { ...commonAlias, ...prodAlias }
-
-    monacoEditorPluginInstance = monacoEditorPlugin({ publicPath: monacoPublicPath[mode] })
-
-    if (mode === 'prod') {
-      config.build.minify = true
-      config.build.sourcemap = false
-    }
-  }
-
   const importmap = {
     imports: {
       prettier: `${VITE_CDN_DOMAIN}/prettier@${importMapVersions.prettier}/esm/standalone.mjs`,
@@ -277,11 +256,54 @@ export default defineConfig(({ command, mode }) => {
       '@opentiny/vue-locale': `${VITE_CDN_DOMAIN}/@opentiny/vue@${importMapVersions.tinyVue}/runtime/tiny-vue-locale.mjs`,
       '@opentiny/vue-design-smb': `${VITE_CDN_DOMAIN}/@opentiny/vue-design-smb@${importMapVersions.tinyVue}/index.js`,
       '@opentiny/vue-theme/theme-tool': `${VITE_CDN_DOMAIN}/@opentiny/vue-theme@${importMapVersions.tinyVue}/theme-tool`,
-      '@opentiny/vue-theme/theme': `${VITE_CDN_DOMAIN}/@opentiny/vue-theme@${importMapVersions.tinyVue}/theme`
+      '@opentiny/vue-theme/theme': `${VITE_CDN_DOMAIN}/@opentiny/vue-theme@${importMapVersions.tinyVue}/theme`,
+      // canvas web component 加载 es 格式需要的依赖
+      // vue 可能需要加上resolveComponent的方法 web component 需要
+      'vue-i18n': `${VITE_CDN_DOMAIN}/vue-i18n@9.9.0/dist/vue-i18n.esm-browser.js`,
+      '@opentiny/tiny-engine-webcomponent-core':
+        command === 'build'
+          ? `${VITE_CDN_DOMAIN}/@opentiny/tiny-engine-webcomponent-core@1/dist/tiny-engine-webcomponent-core.es.js`
+          : toFsPath(devAlias['@opentiny/tiny-engine-webcomponent-core']),
+      '@opentiny/tiny-engine-i18n-host':
+        command === 'build'
+          ? `${VITE_CDN_DOMAIN}/@opentiny/tiny-engine-i18n-host@1/dist/tiny-engine-i18n-host.es.js`
+          : toFsPath(devAlias['@opentiny/tiny-engine-i18n-host']),
+      '@opentiny/tiny-engine-builtin-component':
+        command === 'build'
+          ? `${VITE_CDN_DOMAIN}/@opentiny/tiny-engine-builtin-component@1/dist/index.js`
+          : toFsPath(devAlias['@opentiny/tiny-engine-builtin-component']),
+      pinia: `${VITE_CDN_DOMAIN}/pinia@2.0.22/dist/pinia.esm-browser.js`
     }
   }
 
   const importMapStyles = [`${VITE_CDN_DOMAIN}/@opentiny/vue-theme@${importMapVersions.tinyVue}/index.css`]
+
+  if (command === 'serve') {
+    const devVueAlias = {
+      find: /^vue$/,
+      replacement: importmap.imports.vue
+    }
+    const devOtherAlias = ['vue-i18n', 'pinia'].map((key) => ({ find: key, replacement: importmap.imports[key] }))
+
+    config.resolve.alias = [
+      devVueAlias,
+      ...devOtherAlias,
+      ...Object.entries({ ...commonAlias, ...devAlias }).map(([find, replacement]) => ({
+        find,
+        replacement
+      }))
+    ]
+  } else {
+    // command === 'build'
+    config.resolve.alias = { ...commonAlias, ...prodAlias }
+
+    monacoEditorPluginInstance = monacoEditorPlugin({ publicPath: monacoPublicPath[mode] })
+
+    if (mode === 'prod') {
+      config.build.minify = true
+      config.build.sourcemap = false
+    }
+  }
 
   config.plugins.push(monacoEditorPluginInstance, htmlPlugin(mode), importmapPlugin(importmap, importMapStyles))
 

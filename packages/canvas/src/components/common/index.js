@@ -1,24 +1,29 @@
 /**
-* Copyright (c) 2023 - present TinyEngine Authors.
-* Copyright (c) 2023 - present Huawei Cloud Computing Technologies Co., Ltd.
-*
-* Use of this source code is governed by an MIT-style license.
-*
-* THE OPEN SOURCE SOFTWARE IN THIS PRODUCT IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL,
-* BUT WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS FOR
-* A PARTICULAR PURPOSE. SEE THE APPLICABLE LICENSES FOR MORE DETAILS.
-*
-*/
+ * Copyright (c) 2023 - present TinyEngine Authors.
+ * Copyright (c) 2023 - present Huawei Cloud Computing Technologies Co., Ltd.
+ *
+ * Use of this source code is governed by an MIT-style license.
+ *
+ * THE OPEN SOURCE SOFTWARE IN THIS PRODUCT IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL,
+ * BUT WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS FOR
+ * A PARTICULAR PURPOSE. SEE THE APPLICABLE LICENSES FOR MORE DETAILS.
+ *
+ */
 
 export const NODE_UID = 'data-uid'
 export const NODE_TAG = 'data-tag'
 export const NODE_LOOP = 'loop-id'
 
-export const addScript = (src, doc = document) => {
+export const addScript = (src, doc = document, format) => {
   return new Promise((resolve, reject) => {
     const script = doc.createElement('script')
 
-    script.setAttribute('type', 'text/javascript')
+    if (format === 'module' || src.endsWith('.es.js')) {
+      script.setAttribute('type', 'module')
+    } else {
+      script.setAttribute('type', 'text/javascript')
+    }
+
     script.setAttribute('src', src)
 
     script.async = false

@@ -189,7 +189,11 @@ const generateThirdPartyDeps = (components) => {
     }
 
     if (css) {
-      styles.push(css)
+      if (Array.isArray(css)) {
+        styles.push(...css)
+      } else {
+        styles.push(css)
+      }
     }
   })
 

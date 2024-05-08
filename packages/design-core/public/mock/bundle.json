@@ -2732,7 +2732,12 @@
           "npm": {
             "package": "@opentiny/vue",
             "exportName": "CarouselItem",
-            "version": "",
+            "script": "https://npm.onmicrosoft.cn/@opentiny/vue@3.11/runtime/tiny-vue.mjs",
+            "css": [
+              "https://npm.onmicrosoft.cn/@opentiny/vue-theme@3.11/index.css",
+              "https://npm.onmicrosoft.cn/@opentiny/vue-theme-mobile@3.11/index.css"
+            ],
+            "version": "~3.11.0",
             "destructuring": true
           },
           "group": "component",

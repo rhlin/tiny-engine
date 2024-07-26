@@ -32,7 +32,7 @@ import { useHttp } from '@opentiny/tiny-engine-http'
 import { constants } from '@opentiny/tiny-engine-utils'
 import * as ast from '@opentiny/tiny-engine-common/js/ast'
 import { initCanvas } from '../../init-canvas/init-canvas'
-import { importMap, importStyles } from './importMap'
+import { getImportMapData } from './importMap'
 
 const { PAGE_STATUS } = constants
 
@@ -158,6 +158,7 @@ export default {
       canvasResizeObserver?.disconnect?.()
     })
 
+    const { importMap, importStyles } = getImportMapData(getMergeMeta('engine.config')?.importMapVersion)
     const { html: canvasUrl } = initCanvas(importMap, importStyles)
 
     return {

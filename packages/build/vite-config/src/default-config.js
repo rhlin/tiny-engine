@@ -13,6 +13,7 @@ import generateComment from '@opentiny/tiny-engine-vite-plugin-meta-comments'
 import { getBaseUrlFromCli, copyBundleDeps, copyPreviewImportMap } from './localCdnFile/index.js'
 import { devAliasPlugin } from './vite-plugins/devAliasPlugin.js'
 import { htmlUpgradeHttpsPlugin } from './vite-plugins/upgradeHttpsPlugin.js'
+import { canvasDevExternal } from './canvas-dev-external.js'
 
 const monacoEditorPlugin = monacoEditorPluginCjs.default
 const nodeGlobalsPolyfillPlugin = nodeGlobalsPolyfillPluginCjs.default
@@ -130,7 +131,6 @@ const getDefaultConfig = (engineConfig) => {
 }
 
 export function useTinyEngineBaseConfig(engineConfig) {
-  // TODO: engineConfig.importMapVersions not used
   const { envDir = '', viteConfigEnv } = engineConfig
   const { command = 'serve', mode = 'serve' } = viteConfigEnv
   const env = loadEnv(mode, envDir)
@@ -177,6 +177,10 @@ export function useTinyEngineBaseConfig(engineConfig) {
   )
 
   config.plugins.push(devAliasPlugin(env, engineConfig.useSourceAlias))
+
+  if (engineConfig.useSourceAlias && command === 'serve') {
+    config.plugins.push(canvasDevExternal())
+  }
 
   return config
 }

@@ -10,7 +10,7 @@
  *
  */
 
-import { defineComponent, h, inject, provide, reactive } from 'vue'
+import { defineComponent, h, inject, provide, reactive, ref } from 'vue'
 import { isHTMLTag, hyphenate } from '@vue/shared'
 import { useBroadcastChannel } from '@vueuse/core'
 import { constants, utils } from '@opentiny/tiny-engine-utils'
@@ -309,7 +309,7 @@ const generateBlockContent = (schema) => {
 }
 
 const registerBlock = (componentName) => {
-  getController()
+  return getController()
     .registerBlock?.(componentName, true)
     .then((res) => {
       const blockSchema = res.content
@@ -324,27 +324,33 @@ const registerBlock = (componentName) => {
           item.style.height = '100%'
         })
       }
+      return blockSchema
     })
 }
 
 export const wrapCustomElement = (componentName) => {
   const material = getController().getMaterial(componentName)
+  const asyncData = ref(material)
 
   if (!Object.keys(material).length) {
-    registerBlock(componentName)
+    registerBlock(componentName).then((data) => {
+      asyncData.value = data
+    })
   }
 
   customElements[componentName] = defineComponent({
     name: componentName,
     render() {
-      return h(
-        IsolateRenderer,
-        {
-          schema: material,
-          props: window.parent.TinyGlobalConfig.dslMode === 'Vue' ? getPlainProps(this.$attrs) : this.$attrs
-        },
-        this.$slots.default?.()
-      )
+      return Object.keys(asyncData.value).length
+        ? h(
+            IsolateRenderer,
+            {
+              schema: asyncData.value,
+              props: window.parent.TinyGlobalConfig.dslMode === 'Vue' ? getPlainProps(this.$attrs) : this.$attrs
+            },
+            this.$slots.default?.()
+          )
+        : null
     }
   })
   return customElements[componentName]

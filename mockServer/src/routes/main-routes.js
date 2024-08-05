@@ -98,6 +98,11 @@ router.get('/material-center/api/block/detail/:id', async (ctx) => {
   ctx.body = await mockService.blockService.detail(id)
 })
 
+router.get('/material-center/api/block', async (ctx) => {
+  const query = ctx.query
+  ctx.body = getResponseData(await mockService.blockService.find(query))
+})
+
 router.get('/material-center/api/blocks', async (ctx) => {
   const { appId } = ctx.params
   ctx.body = await mockService.blockService.list(appId)

@@ -10,7 +10,7 @@
  *
  */
 
-import { h, provide, reactive } from 'vue'
+import { h, inject, provide, reactive } from 'vue'
 import { isHTMLTag, hyphenate } from '@vue/shared'
 import { useBroadcastChannel } from '@vueuse/core'
 import { constants, utils } from '@opentiny/tiny-engine-utils'
@@ -30,6 +30,7 @@ import {
   CanvasImg,
   CanvasPlaceholder
 } from './builtin'
+import { WITH_CONTEXT } from './RenderMain'
 
 const { BROADCAST_CHANNEL } = constants
 const { hyphenateRE } = utils
@@ -547,7 +548,7 @@ const checkGroup = (componentName) => configure[componentName]?.nestingRule?.chi
 
 const clickCapture = (componentName) => configure[componentName]?.clickCapture !== false
 
-const getBindProps = (schema, scope) => {
+const getBindProps = (schema, scope, ctx) => {
   const { id, componentName } = schema
   const invalidity = configure[componentName]?.invalidity || []
 
@@ -556,7 +557,7 @@ const getBindProps = (schema, scope) => {
   }
 
   const bindProps = {
-    ...parseData(schema.props, scope),
+    ...parseData(schema.props, scope, ctx),
     [DESIGN_UIDKEY]: id,
     [DESIGN_TAGKEY]: componentName,
     onMoseover: stopEvent,
@@ -613,10 +614,11 @@ const injectPlaceHolder = (componentName, children) => {
   return children
 }
 
-const renderGroup = (children, scope, parent) => {
+const renderGroup = (children, scope, parent, withContext) => {
   return children.map?.((schema) => {
     const { componentName, children, loop, loopArgs, condition, id } = schema
     const loopList = parseData(loop, scope)
+    const ctxContext = withContext?.context || context
 
     const renderElement = (item, index) => {
       const mergeScope = getLoopScope({
@@ -626,9 +628,10 @@ const renderGroup = (children, scope, parent) => {
         loopArgs
       })
 
-      setNode(schema, parent)
+      ;(withContext?.setNode || setNode)(schema, parent)
 
-      if (conditions[id] === false || !parseCondition(condition, mergeScope)) {
+      const ctxConditions = withContext?.conditions || conditions
+      if (ctxConditions[id] === false || !parseCondition(condition, mergeScope, ctxContext)) {
         return null
       }
 
@@ -639,7 +642,7 @@ const renderGroup = (children, scope, parent) => {
         getBindProps(schema, mergeScope),
         Array.isArray(renderChildren)
           ? renderSlot(renderChildren, mergeScope, schema)
-          : parseData(renderChildren, mergeScope)
+          : parseData(renderChildren, mergeScope, ctxContext)
       )
     }
 
@@ -647,7 +650,7 @@ const renderGroup = (children, scope, parent) => {
   })
 }
 
-const getChildren = (schema, mergeScope) => {
+const getChildren = (schema, mergeScope, withContext) => {
   const { componentName, children } = schema
   const renderChildren = injectPlaceHolder(componentName, children)
 
@@ -661,7 +664,7 @@ const getChildren = (schema, mergeScope) => {
       return renderDefault(renderChildren, mergeScope, schema)
     } else {
       return isGroup
-        ? renderGroup(renderChildren, mergeScope, schema)
+        ? renderGroup(renderChildren, mergeScope, schema, withContext)
         : renderSlot(renderChildren, mergeScope, schema, isCustomElm)
     }
   } else {
@@ -682,17 +685,18 @@ export const renderer = {
   render() {
     const { scope, schema, parent } = this
     const { componentName, loop, loopArgs, condition } = schema
+    const withContext = inject(WITH_CONTEXT)
 
     // 处理数据源和表格fetchData的映射关系
     generateCollection(schema)
 
     if (!componentName) {
-      return parseData(schema, scope)
+      return parseData(schema, scope, withContext?.context || context)
     }
 
     const component = getComponent(componentName)
 
-    const loopList = parseData(loop, scope)
+    const loopList = parseData(loop, scope, withContext?.context || context)
 
     const renderElement = (item, index) => {
       let mergeScope = item
@@ -713,13 +717,19 @@ export const renderer = {
       }
 
       // 给每个节点设置schema.id，并缓存起来
-      setNode(schema, parent)
+      const ctxSetNode = withContext?.setNode || setNode
+      ctxSetNode(schema, parent)
 
-      if (conditions[schema.id] === false || !parseCondition(condition, mergeScope)) {
+      const ctxConditions = withContext?.conditions || conditions
+      if (ctxConditions[schema.id] === false || !parseCondition(condition, mergeScope)) {
         return null
       }
 
-      return h(component, getBindProps(schema, mergeScope), getChildren(schema, mergeScope))
+      return h(
+        component,
+        getBindProps(schema, mergeScope, withContext?.context || context),
+        getChildren(schema, mergeScope)
+      )
     }
 
     return loopList?.length ? loopList.map(renderElement) : renderElement()

@@ -8,10 +8,11 @@
 
 <script>
 import { ref, watch, computed, inject } from 'vue'
+import { CANVAS_API } from '../RenderMain'
 import { getController } from '../render'
 import CanvasPlaceholder from './CanvasPlaceholder.vue'
 
-import { getHandler } from './CanvasCollection.js'
+import { useHandler } from './CanvasCollection.js'
 
 export const fetchDataSourceDetail = (dataSourceId) =>
   getController().request.get(`/app-center/api/sources/detail/${dataSourceId}`) // TODO: 强行耦合了
@@ -34,6 +35,8 @@ export default {
   setup(props) {
     const source = ref(null)
     const pageSchema = inject('rootSchema')
+    const api = inject(CANVAS_API)
+    const { getHandler } = useHandler(api)
 
     if (props.dataSource) {
       fetchDataSourceDetail(props.dataSource).then((res) => {

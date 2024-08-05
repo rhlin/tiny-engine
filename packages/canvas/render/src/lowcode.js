@@ -12,10 +12,10 @@
 
 import { getCurrentInstance, nextTick, provide, inject } from 'vue'
 import { I18nInjectionKey } from 'vue-i18n'
-import { api } from './RenderMain'
+import { CANVAS_API } from './RenderMain'
 import { collectionMethodsMap, generateFn, globalNotify } from './render'
 
-export const lowcodeWrap = (props, context) => {
+export const lowcodeWrap = (api) => (props, context) => {
   const global = {}
   const instance = getCurrentInstance()
   const router = ''
@@ -99,6 +99,7 @@ export const lowcodeWrap = (props, context) => {
 
 export default () => {
   const i18n = inject(I18nInjectionKey)
+  const api = inject(CANVAS_API)
   provide(I18nInjectionKey, i18n)
-  return { t: i18n.global.t, lowcodeWrap }
+  return { t: i18n.global.t, lowcodeWrap: lowcodeWrap(api) }
 }

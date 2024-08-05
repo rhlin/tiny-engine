@@ -10,7 +10,7 @@
  *
  */
 
-import { h, inject, provide, reactive } from 'vue'
+import { defineComponent, h, inject, provide, reactive } from 'vue'
 import { isHTMLTag, hyphenate } from '@vue/shared'
 import { useBroadcastChannel } from '@vueuse/core'
 import { constants, utils } from '@opentiny/tiny-engine-utils'
@@ -31,6 +31,7 @@ import {
   CanvasPlaceholder
 } from './builtin'
 import { WITH_CONTEXT } from './RenderMain'
+import IsolateRenderer from './IsolateRenderer'
 
 const { BROADCAST_CHANNEL } = constants
 const { hyphenateRE } = utils
@@ -309,7 +310,7 @@ const generateBlockContent = (schema) => {
 
 const registerBlock = (componentName) => {
   getController()
-    .registerBlock?.(componentName)
+    .registerBlock?.(componentName, true)
     .then((res) => {
       const blockSchema = res.content
 
@@ -333,17 +334,19 @@ export const wrapCustomElement = (componentName) => {
     registerBlock(componentName)
   }
 
-  customElements[componentName] = {
-    name: componentName + '.ce',
+  customElements[componentName] = defineComponent({
+    name: componentName,
     render() {
       return h(
-        hyphenate(componentName),
-        window.parent.TinyGlobalConfig.dslMode === 'Vue' ? getPlainProps(this.$attrs) : this.$attrs,
+        IsolateRenderer,
+        {
+          schema: material,
+          props: window.parent.TinyGlobalConfig.dslMode === 'Vue' ? getPlainProps(this.$attrs) : this.$attrs
+        },
         this.$slots.default?.()
       )
     }
-  }
-
+  })
   return customElements[componentName]
 }
 

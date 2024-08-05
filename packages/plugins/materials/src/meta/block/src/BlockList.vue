@@ -89,7 +89,7 @@ export default {
 
       block.assets = getBlockAssetsByVersion(block, block.current_version)
 
-      registerBlock(block).then(() => {
+      registerBlock(block, true).then(() => {
         const blockName = block.component || block.blockName
         const node = generateNode({ type: 'block', component: blockName })
         const { addComponent, dragStart } = useCanvas().canvasApi.value

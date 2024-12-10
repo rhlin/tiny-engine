@@ -78,14 +78,30 @@ export function useCondition() {
   }
 }
 
+export function usePageContextParent() {
+  let contextParent = null
+  function setContextParent(parent: any) {
+    contextParent = parent
+  }
+  function getContextParent() {
+    return contextParent
+  }
+  return {
+    setContextParent,
+    getContextParent
+  }
+}
+
 export function usePageContext() {
   const contextExpose = useContext()
   const nodeExpose = useNodes()
   const conditionExpose = useCondition()
+  const contextParentExpose = usePageContextParent()
   return {
     ...contextExpose,
     ...nodeExpose,
-    ...conditionExpose
+    ...conditionExpose,
+    ...contextParentExpose
   }
 }
 
@@ -101,5 +117,7 @@ export const {
   conditions,
   setCondition,
   getCondition,
-  getConditions
+  getConditions,
+  setContextParent,
+  getContextParent
 } = usePageContext()

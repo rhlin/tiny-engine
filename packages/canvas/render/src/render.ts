@@ -13,7 +13,7 @@
 import { defineComponent, h, provide } from 'vue'
 
 import { NODE_UID as DESIGN_UIDKEY, NODE_TAG as DESIGN_TAGKEY, NODE_LOOP as DESIGN_LOOPID } from '../../common'
-import { conditions, setNode } from './context'
+import { conditions, context, setNode } from './page-block-function/context'
 import { getDesignMode, DESIGN_MODE } from './canvas-function'
 import { parseCondition, parseData, parseLoopArgs } from './data-function'
 import { blockSlotDataMap, getComponent, generateCollection, Mapper, configure } from './material-function'
@@ -85,7 +85,7 @@ const getBindProps = (schema, scope) => {
   }
 
   const bindProps = {
-    ...parseData(schema.props, scope),
+    ...parseData(schema.props, scope, context),
     [DESIGN_UIDKEY]: id,
     [DESIGN_TAGKEY]: componentName
   }
@@ -146,10 +146,10 @@ const injectPlaceHolder = (componentName, children) => {
   return children
 }
 
-const renderGroup = (children, scope, parent) => {
+const renderGroup = (children, scope, parent, context) => {
   return children.map?.((schema) => {
     const { componentName, children, loop, loopArgs, condition, id } = schema
-    const loopList = parseData(loop, scope)
+    const loopList = parseData(loop, scope, context)
 
     const renderElement = (item?, index?) => {
       const mergeScope = getLoopScope({
@@ -161,7 +161,7 @@ const renderGroup = (children, scope, parent) => {
 
       setNode(schema, parent)
 
-      if (conditions[id] === false || !parseCondition(condition, mergeScope)) {
+      if (conditions[id] === false || !parseCondition(condition, mergeScope, context)) {
         return null
       }
 
@@ -172,7 +172,7 @@ const renderGroup = (children, scope, parent) => {
         getBindProps(schema, mergeScope),
         Array.isArray(renderChildren)
           ? renderSlot(renderChildren, mergeScope, schema)
-          : parseData(renderChildren, mergeScope)
+          : parseData(renderChildren, mergeScope, context)
       )
     }
 
@@ -194,11 +194,11 @@ const getChildren = (schema, mergeScope) => {
       return renderDefault(renderChildren, mergeScope, schema)
     } else {
       return isGroup
-        ? renderGroup(renderChildren, mergeScope, schema)
+        ? renderGroup(renderChildren, mergeScope, schema, context)
         : renderSlot(renderChildren, mergeScope, schema, isCustomElm)
     }
   } else {
-    return parseData(renderChildren, mergeScope)
+    return parseData(renderChildren, mergeScope, context)
   }
 }
 
@@ -220,12 +220,12 @@ export const renderer = defineComponent({
     generateCollection(schema)
 
     if (!componentName) {
-      return parseData(schema, scope)
+      return parseData(schema, scope, context)
     }
 
     const component = getComponent(componentName)
 
-    const loopList = parseData(loop, scope)
+    const loopList = parseData(loop, scope, context)
 
     const renderElement = (item?, index?) => {
       let mergeScope = item
@@ -248,7 +248,7 @@ export const renderer = defineComponent({
       // 给每个节点设置schema.id，并缓存起来
       setNode(schema, parent)
 
-      if (conditions[schema.id] === false || !parseCondition(condition, mergeScope)) {
+      if (conditions[schema.id] === false || !parseCondition(condition, mergeScope, context)) {
         return null
       }
 

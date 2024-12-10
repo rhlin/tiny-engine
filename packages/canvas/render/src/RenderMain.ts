@@ -26,7 +26,7 @@ import {
   getConditions,
   context,
   setNode
-} from './context'
+} from './page-block-function/context'
 import { getDesignMode, setDesignMode, setController, useCustomRenderer } from './canvas-function'
 import { setConfigure } from './material-function'
 import { useUtils, useBridge, useDataSourceMap, useGlobalState } from './application-function'

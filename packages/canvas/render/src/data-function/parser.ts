@@ -4,11 +4,15 @@ import i18nHost from '@opentiny/tiny-engine-i18n-host'
 
 import { globalNotify } from '../canvas-function'
 import { collectionMethodsMap, customElements, getComponent, getIcon } from '../material-function'
-import { context } from '../context'
 import { newFn } from '../data-utils'
 import { renderDefault } from '../render'
 
-const parseList = []
+interface ITypeParserDef {
+  type: (data) => boolean
+  parseFunc: (data: unknown, scope: Record<string, any>, ctx: Record<string, any>) => unknown
+}
+
+const parseList: Array<ITypeParserDef> = []
 
 const isI18nData = (data) => {
   return data && data.type === 'i18n'
@@ -41,7 +45,9 @@ const isArray = (data) => {
 const isFunction = (data) => {
   return typeof data === 'function'
 }
-
+const isIcon = (data) => {
+  return data?.componentName === 'Icon'
+}
 const isObject = (data) => {
   return typeof data === 'object'
 }
@@ -122,7 +128,7 @@ const parseFunctionString = (fnStr) => {
 }
 
 // 解析JSX字符串为可执行函数
-const parseJSXFunction = (data, ctx) => {
+const parseJSXFunction = (data, _scope, ctx) => {
   try {
     const newValue = transformJSX(data.value)
     const fnInfo = parseFunctionString(newValue)
@@ -185,46 +191,44 @@ export const generateFn = (innerFn, context?) => {
     }
   }
 }
-const parseJSFunction = (data, scope, ctx = context) => {
+const parseJSFunction = (data, _scope, ctx) => {
   try {
     const innerFn = newFn(`return ${data.value}`).bind(ctx)()
     return generateFn(innerFn, ctx)
   } catch (error) {
-    return parseJSXFunction(data, ctx)
+    return parseJSXFunction(data, null, ctx)
   }
 }
 
-const parseJSSlot = (data, scope) => {
+const parseJSSlot = (data, scope, _ctx) => {
   return ($scope) => renderDefault(data.value, { ...scope, ...$scope }, data)
 }
 
-export function parseData(data, scope?, ctx = context) {
-  let res = data
-  parseList.some((item) => {
-    if (item.type(data)) {
-      res = item.parseFunc(data, scope, ctx)
-
-      return true
-    }
-
-    return false
-  })
-
-  return res
+export function parseData(data, scope, ctx) {
+  const typeParser = parseList.find((item) => item.type(data))
+  return typeParser ? typeParser.parseFunc(data, scope, ctx) : data
 }
 
-export const parseCondition = (condition, scope, ctx = context) => {
+export const parseCondition = (condition, scope, ctx) => {
   // eslint-disable-next-line no-eq-null
   return condition == null ? true : parseData(condition, scope, ctx)
 }
 
-export const parseLoopArgs = (_loop) => {
-  if (_loop) {
-    const { item, index, loopArgs = '' } = _loop
-    const body = `return {${loopArgs[0] || 'item'}: item, ${loopArgs[1] || 'index'} : index }`
-    return newFn('item,index', body)(item, index)
+export const parseLoopArgs = (loop?: { item: unknown; index: number; loopArgs?: string[] }) => {
+  if (!loop) {
+    return undefined
   }
-  return undefined
+  const { item, index, loopArgs = [] } = loop
+  const body = `return {${loopArgs[0] || 'item'}: item, ${loopArgs[1] || 'index'} : index }`
+  return newFn('item,index', body)(item, index)
+}
+
+const parseIcon = (data, _scope, _ctx) => {
+  return getIcon(data.props.name)
+}
+
+const parseStateAccessor = (data, _scope, ctx) => {
+  return parseData(data.defaultValue, null, ctx)
 }
 
 const parseObjectData = (data, scope, ctx) => {
@@ -232,15 +236,6 @@ const parseObjectData = (data, scope, ctx) => {
     return data
   }
 
-  // 如果是状态访问器,则直接解析默认值
-  if (isStateAccessor(data)) {
-    return parseData(data.defaultValue)
-  }
-
-  // 解析通过属性传递icon图标组件
-  if (data.componentName === 'Icon') {
-    return getIcon(data.props.name)
-  }
   const res = {}
   Object.entries(data).forEach(([key, value]: [string, any]) => {
     // 如果是插槽则需要进行特殊处理
@@ -286,6 +281,14 @@ parseList.push(
     {
       type: isJSSlot,
       parseFunc: parseJSSlot
+    },
+    {
+      type: isIcon,
+      parseFunc: parseIcon
+    },
+    {
+      type: isStateAccessor,
+      parseFunc: parseStateAccessor
     },
     {
       type: isString,

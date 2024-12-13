@@ -133,6 +133,32 @@
           }
         },
         {
+          "icon": "Router",
+          "name": {
+            "zh_CN": "RouterView"
+          },
+          "component": "RouterView",
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "collapse": {
+                  "number": 6,
+                  "text": {
+                    "zh_CN": "显示更多"
+                  }
+                },
+                "content": []
+              }
+            ]
+          }
+        },
+        {
           "icon": "Collection",
           "name": {
             "zh_CN": "Collection"
@@ -517,6 +543,18 @@
               "icon": "slot",
               "schema": {
                 "componentName": "Slot",
+                "props": {}
+              }
+            },
+            {
+              "name": {
+                "zh_CN": "路由视图"
+              },
+              "screenshot": "",
+              "snippetName": "RouterView",
+              "icon": "RouterView",
+              "schema": {
+                "componentName": "RouterView",
                 "props": {}
               }
             },

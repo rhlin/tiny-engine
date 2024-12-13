@@ -7,19 +7,11 @@ import { useMethods } from './methods'
 import { nextTick } from 'vue'
 import { globalNotify } from '../canvas-function'
 import { setPagecss } from './css'
-
-export declare interface ISchemaSection {
-  componentName?: string
-  props?: Record<string, any>
-  children?: Array<ISchemaSection>
-}
-export interface IPageSchema extends ISchemaSection {
-  methods?: Record<string, any>
-  css?: string
-}
+import type { IPageSchema, ISchemaChildrenItem } from '@opentiny/tiny-engine-dsl-vue'
+export { IPageSchema, ISchemaChildrenItem }
 
 export function useSchema(
-  { context: globalContext, setContext, getContext, clearNodes },
+  { context: globalContext, setContext, getContext, clearNodes, getNode },
   { utils, bridge, stores, getDataSourceMap }
 ) {
   const schema = reactive<IPageSchema>({})
@@ -65,6 +57,7 @@ export function useSchema(
       emit: () => {} // 兼容访问器中getter和setter中this.emit写法
     }
     Object.defineProperty(context, 'dataSourceMap', {
+      // TODO: defineProperty不可枚举会在setContext中Object.assign时不能被枚举，理论上无效
       get: getDataSourceMap
     })
     // 此处提升很重要，因为setState、initProps也会触发画布重新渲染，所以需要提升上下文环境的设置时间
@@ -130,6 +123,10 @@ export function useSchema(
       methods,
       getMethods,
       setMethods
+    },
+    ...{
+      getContext,
+      getNode
     },
     setPagecss
   }

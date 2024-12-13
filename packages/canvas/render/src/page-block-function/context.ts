@@ -92,32 +92,28 @@ export function usePageContextParent() {
   }
 }
 
+export function useCssScopeId() {
+  let cssScopeId = null
+  function setCssCopeId(id) {
+    cssScopeId = id
+  }
+  return {
+    cssScopeId,
+    setCssCopeId
+  }
+}
 export function usePageContext() {
   const contextExpose = useContext()
   const nodeExpose = useNodes()
   const conditionExpose = useCondition()
   const contextParentExpose = usePageContextParent()
+  const cssCopeIdExpose = useCssScopeId()
   return {
     ...contextExpose,
     ...nodeExpose,
     ...conditionExpose,
-    ...contextParentExpose
+    ...contextParentExpose,
+    ...cssCopeIdExpose
   }
 }
-
-export const {
-  context,
-  setContext,
-  getContext,
-  setNode,
-  getNode,
-  delNode,
-  clearNodes,
-  getRoot,
-  conditions,
-  setCondition,
-  getCondition,
-  getConditions,
-  setContextParent,
-  getContextParent
-} = usePageContext()
+export type IPageContext = ReturnType<typeof usePageContext>

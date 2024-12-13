@@ -10,13 +10,13 @@
  *
  */
 
-import { defineComponent, h, provide } from 'vue'
+import { defineComponent, h, inject, provide } from 'vue'
 
 import { NODE_UID as DESIGN_UIDKEY, NODE_TAG as DESIGN_TAGKEY, NODE_LOOP as DESIGN_LOOPID } from '../../common'
-import { conditions, context, setNode } from './page-block-function/context'
 import { getDesignMode, DESIGN_MODE } from './canvas-function'
 import { parseCondition, parseData, parseLoopArgs } from './data-function'
 import { blockSlotDataMap, getComponent, generateCollection, Mapper, configure } from './material-function'
+import { getPage } from './material-function/page-getter'
 
 export const renderDefault = (children, scope, parent) =>
   children.map?.((child) =>
@@ -76,7 +76,7 @@ const checkGroup = (componentName) => configure[componentName]?.nestingRule?.chi
 
 const clickCapture = (componentName) => configure[componentName]?.clickCapture !== false
 
-const getBindProps = (schema, scope) => {
+const getBindProps = (schema, scope, context) => {
   const { id, componentName } = schema
   const invalidity = configure[componentName]?.invalidity || []
 
@@ -146,10 +146,10 @@ const injectPlaceHolder = (componentName, children) => {
   return children
 }
 
-const renderGroup = (children, scope, parent, context) => {
+const renderGroup = (children, scope, parent, pageContext) => {
   return children.map?.((schema) => {
     const { componentName, children, loop, loopArgs, condition, id } = schema
-    const loopList = parseData(loop, scope, context)
+    const loopList = parseData(loop, scope, pageContext.context)
 
     const renderElement = (item?, index?) => {
       const mergeScope = getLoopScope({
@@ -159,9 +159,9 @@ const renderGroup = (children, scope, parent, context) => {
         loopArgs
       })
 
-      setNode(schema, parent)
+      pageContext.setNode(schema, parent)
 
-      if (conditions[id] === false || !parseCondition(condition, mergeScope, context)) {
+      if (pageContext.conditions[id] === false || !parseCondition(condition, mergeScope, pageContext.context)) {
         return null
       }
 
@@ -169,10 +169,10 @@ const renderGroup = (children, scope, parent, context) => {
 
       return h(
         getComponent(componentName),
-        getBindProps(schema, mergeScope),
+        getBindProps(schema, mergeScope, pageContext.context),
         Array.isArray(renderChildren)
           ? renderSlot(renderChildren, mergeScope, schema)
-          : parseData(renderChildren, mergeScope, context)
+          : parseData(renderChildren, mergeScope, pageContext.context)
       )
     }
 
@@ -180,7 +180,7 @@ const renderGroup = (children, scope, parent, context) => {
   })
 }
 
-const getChildren = (schema, mergeScope) => {
+const getChildren = (schema, mergeScope, pageContext) => {
   const { componentName, children } = schema
   const renderChildren = injectPlaceHolder(componentName, children)
 
@@ -194,12 +194,23 @@ const getChildren = (schema, mergeScope) => {
       return renderDefault(renderChildren, mergeScope, schema)
     } else {
       return isGroup
-        ? renderGroup(renderChildren, mergeScope, schema, context)
+        ? renderGroup(renderChildren, mergeScope, schema, pageContext)
         : renderSlot(renderChildren, mergeScope, schema, isCustomElm)
     }
   } else {
-    return parseData(renderChildren, mergeScope, context)
+    return parseData(renderChildren, mergeScope, pageContext.context)
   }
+}
+function getRenderPageId(currentPageId, isPageStart) {
+  const pagePathFromRoot = [] // TODO: 从查询api来
+  function getNextChild(currentPageId) {
+    const index = pagePathFromRoot.indexOf(currentPageId)
+    if (index + 1 < pagePathFromRoot.length) {
+      return pagePathFromRoot[index + 1]
+    }
+    return null
+  }
+  return isPageStart ? pagePathFromRoot[0] : getNextChild(currentPageId)
 }
 
 export const renderer = defineComponent({
@@ -207,7 +218,8 @@ export const renderer = defineComponent({
   props: {
     schema: Object,
     scope: Object,
-    parent: Object
+    parent: Object,
+    pageContext: Object
   },
   setup(props) {
     provide('schema', props.schema)
@@ -215,17 +227,29 @@ export const renderer = defineComponent({
   render() {
     const { scope, schema, parent } = this
     const { componentName, loop, loopArgs, condition } = schema
+    const pageContext = this.pageContext || inject('pageContext')
 
     // 处理数据源和表格fetchData的映射关系
     generateCollection(schema)
 
     if (!componentName) {
-      return parseData(schema, scope, context)
+      return parseData(schema, scope, pageContext.context)
+    }
+
+    const isPageStart = schema.componentType === 'PageStart'
+    const isRouterView = componentName === 'RouterView'
+    if (isPageStart || isRouterView) {
+      const renderPageId = getRenderPageId(pageContext.pageId, isPageStart)
+      if (renderPageId) {
+        return h(getPage(renderPageId), {
+          [DESIGN_TAGKEY]: `${componentName}`
+        })
+      }
     }
 
     const component = getComponent(componentName)
 
-    const loopList = parseData(loop, scope, context)
+    const loopList = parseData(loop, scope, pageContext.context)
 
     const renderElement = (item?, index?) => {
       let mergeScope = item
@@ -246,13 +270,17 @@ export const renderer = defineComponent({
       }
 
       // 给每个节点设置schema.id，并缓存起来
-      setNode(schema, parent)
+      pageContext.setNode(schema, parent)
 
-      if (conditions[schema.id] === false || !parseCondition(condition, mergeScope, context)) {
+      if (pageContext.conditions[schema.id] === false || !parseCondition(condition, mergeScope, pageContext.context)) {
         return null
       }
 
-      return h(component, getBindProps(schema, mergeScope), getChildren(schema, mergeScope))
+      return h(
+        component,
+        getBindProps(schema, mergeScope, pageContext.context),
+        getChildren(schema, mergeScope, pageContext)
+      )
     }
 
     return loopList?.length ? loopList.map(renderElement) : renderElement()

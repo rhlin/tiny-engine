@@ -18,10 +18,8 @@ module.exports = {
   },
   extends: ['eslint:recommended', 'plugin:vue/vue3-essential', '@vue/eslint-config-typescript'],
   parser: 'vue-eslint-parser',
-  // 忽略 expected 中的内容
-  ignorePatterns: ['type.d.ts'],
   parserOptions: {
-    parser: '@babel/eslint-parser',
+    parser: '@typescript-eslint/parser',
     ecmaVersion: 'latest',
     sourceType: 'module',
     requireConfigFile: false,
@@ -38,7 +36,8 @@ module.exports = {
     'space-before-function-paren': 'off',
     'vue/multi-word-component-names': 'off',
     'no-use-before-define': 'error',
-    'no-unused-vars': ['error', { ignoreRestSiblings: true, varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true, varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
     'import/no-inner-modules': 'off'
   }
 }

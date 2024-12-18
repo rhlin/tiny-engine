@@ -76,21 +76,23 @@ const checkGroup = (componentName) => configure[componentName]?.nestingRule?.chi
 
 const clickCapture = (componentName) => configure[componentName]?.clickCapture !== false
 
-const getBindProps = (schema, scope, context) => {
+const getBindProps = (schema, scope, context, pageContext) => {
   const { id, componentName } = schema
   const invalidity = configure[componentName]?.invalidity || []
 
   if (componentName === 'CanvasPlaceholder') {
     return {}
   }
-
+  const { active, getCssScopeId } = pageContext
+  const cssScopeId = getCssScopeId()
   const bindProps = {
     ...parseData(schema.props, scope, context),
-    [DESIGN_UIDKEY]: id,
+    ...(cssScopeId ? { [cssScopeId]: '' } : {}),
+    ...(active ? { [DESIGN_UIDKEY]: id } : {}),
     [DESIGN_TAGKEY]: componentName
   }
 
-  if (getDesignMode() === DESIGN_MODE.DESIGN) {
+  if (getDesignMode() === DESIGN_MODE.DESIGN && active) {
     bindProps.onMouseover = stopEvent
     bindProps.onFocus = stopEvent
   }
@@ -100,7 +102,7 @@ const getBindProps = (schema, scope, context) => {
   }
 
   // 在捕获阶段阻止事件的传播
-  if (clickCapture(componentName) && getDesignMode() === DESIGN_MODE.DESIGN) {
+  if (clickCapture(componentName) && getDesignMode() === DESIGN_MODE.DESIGN && active) {
     bindProps.onClickCapture = stopEvent
   }
 
@@ -113,7 +115,9 @@ const getBindProps = (schema, scope, context) => {
   delete bindProps.className
 
   // 使画布中元素可拖拽
-  bindProps.draggable = true
+  if (active) {
+    bindProps.draggable = true
+  }
 
   // 过滤在门户网站上配置的画布丢弃的属性
   invalidity.forEach((prop) => delete bindProps[prop])
@@ -169,7 +173,7 @@ const renderGroup = (children, scope, parent, pageContext) => {
 
       return h(
         getComponent(componentName),
-        getBindProps(schema, mergeScope, pageContext.context),
+        getBindProps(schema, mergeScope, pageContext.context, pageContext),
         Array.isArray(renderChildren)
           ? renderSlot(renderChildren, mergeScope, schema)
           : parseData(renderChildren, mergeScope, pageContext.context)
@@ -202,7 +206,8 @@ const getChildren = (schema, mergeScope, pageContext) => {
   }
 }
 function getRenderPageId(currentPageId, isPageStart) {
-  const pagePathFromRoot = [] // TODO: 从查询api来
+  const pagePathFromRoot = (inject('page-ancestors') as Ref<any[]>).value
+
   function getNextChild(currentPageId) {
     const index = pagePathFromRoot.indexOf(currentPageId)
     if (index + 1 < pagePathFromRoot.length) {
@@ -223,11 +228,16 @@ export const renderer = defineComponent({
   },
   setup(props) {
     provide('schema', props.schema)
+    const currentPageContext = props.pageContext || inject('pageContext')
+    return {
+      currentPageContext
+    }
   },
   render() {
     const { scope, schema, parent } = this
     const { componentName, loop, loopArgs, condition } = schema
-    const pageContext = this.pageContext || inject('pageContext')
+    const pageContext = this.currentPageContext
+    const ancestors = inject('page-ancestors') as Ref<any[]>
 
     // 处理数据源和表格fetchData的映射关系
     generateCollection(schema)
@@ -238,10 +248,11 @@ export const renderer = defineComponent({
 
     const isPageStart = schema.componentType === 'PageStart'
     const isRouterView = componentName === 'RouterView'
-    if (isPageStart || isRouterView) {
+    if (ancestors.value.length && (isPageStart || isRouterView)) {
       const renderPageId = getRenderPageId(pageContext.pageId, isPageStart)
       if (renderPageId) {
         return h(getPage(renderPageId), {
+          key: ancestors.value,
           [DESIGN_TAGKEY]: `${componentName}`
         })
       }
@@ -278,7 +289,7 @@ export const renderer = defineComponent({
 
       return h(
         component,
-        getBindProps(schema, mergeScope, pageContext.context),
+        getBindProps(schema, mergeScope, pageContext.context, pageContext),
         getChildren(schema, mergeScope, pageContext)
       )
     }

@@ -14,7 +14,7 @@ export function useSchema(
   { context: globalContext, setContext, getContext, clearNodes, getNode },
   { utils, bridge, stores, getDataSourceMap }
 ) {
-  const schema = reactive<IPageSchema>({})
+  const schema = reactive<Partial<IPageSchema>>({})
   const { generateAccessor, stateAccessorMap, propsAccessorMap, generateStateAccessors } = useAccessorMap(globalContext)
 
   const { state, getState, setState, deleteState } = useState(schema, {

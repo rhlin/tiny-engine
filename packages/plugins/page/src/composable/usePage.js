@@ -13,6 +13,10 @@
 import { reactive, ref } from 'vue'
 import { extend, isEqual } from '@opentiny/vue-renderless/common/object'
 
+import { useMessage } from '@opentiny/tiny-engine-meta-register'
+const { publish } = useMessage()
+const postHistoryChanged = (data) => publish({ topic: 'historyChanged', data })
+
 const DEFAULT_PAGE = {
   app: '',
   name: '',
@@ -135,6 +139,7 @@ const COMMON_PAGE_GROUP_ID = 1
 export default () => {
   return {
     DEFAULT_PAGE,
+    postHistoryChanged,
     selectedTemplateCard,
     pageSettingState,
     isTemporaryPage,

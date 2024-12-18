@@ -10,7 +10,7 @@
  *
  */
 
-import { shallowReactive } from 'vue'
+import { ref, shallowReactive } from 'vue'
 import { utils } from '@opentiny/tiny-engine-utils'
 
 export function useContext() {
@@ -94,12 +94,15 @@ export function usePageContextParent() {
 
 export function useCssScopeId() {
   let cssScopeId = null
-  function setCssCopeId(id) {
+  function setCssScopeId(id: string) {
     cssScopeId = id
   }
+  function getCssScopeId() {
+    return cssScopeId
+  }
   return {
-    cssScopeId,
-    setCssCopeId
+    getCssScopeId,
+    setCssScopeId
   }
 }
 export function usePageContext() {
@@ -113,7 +116,9 @@ export function usePageContext() {
     ...nodeExpose,
     ...conditionExpose,
     ...contextParentExpose,
-    ...cssCopeIdExpose
+    ...cssCopeIdExpose,
+    pageId: '',
+    active: false
   }
 }
 export type IPageContext = ReturnType<typeof usePageContext>

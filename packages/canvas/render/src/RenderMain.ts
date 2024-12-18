@@ -10,16 +10,20 @@
  *
  */
 
-import { provide, watch, defineComponent, PropType } from 'vue'
+import { provide, watch, defineComponent, PropType, ref, inject, onUnmounted } from 'vue'
 
 import { useBroadcastChannel } from '@vueuse/core'
 import { constants } from '@opentiny/tiny-engine-utils'
 
-import { getDesignMode, setDesignMode, setController, useCustomRenderer } from './canvas-function'
+import { getDesignMode, setDesignMode, setController, useCustomRenderer, getController } from './canvas-function'
 import { setConfigure } from './material-function'
 import { useUtils, useBridge, useDataSourceMap, useGlobalState } from './application-function'
 import { IPageSchema, useContext, usePageContext, useSchema } from './page-block-function'
 import { api, setCurrentApi } from './canvas-function/canvas-api'
+import { getPageAncestors } from './material-function/page-getter'
+import CanvasEmpty from './canvas-function/CanvasEmpty.vue'
+import { h } from 'vue'
+import { setCurrentPage } from './canvas-function/page-switcher'
 
 const { BROADCAST_CHANNEL } = constants
 
@@ -127,17 +131,41 @@ export default defineComponent({
     },
     active: {
       type: Boolean,
-      default: true
-    }
+      default: false
+    },
+    pageId: String
   },
   setup(props) {
-    const pageContext = props.active ? activePageContext : usePageContext()
+    const pageAncestors = (inject('page-ancestors') as Ref<any[]>) || ref(null)
+    const pageIdFromPath = getController().getBaseInfo().pageId
+    const pageContext = props.active || !pageIdFromPath ? activePageContext : usePageContext()
     provide('pageContext', pageContext)
+
     pageContext.setContextParent(props.parentContext)
+    pageContext.pageId = props.pageId || pageIdFromPath
+    pageContext.active = props.active || pageIdFromPath === pageContext.pageId
+    pageContext.setCssScopeId(props.cssScopeId || (props.entry ? null : `data-te-page-${pageContext.pageId}`))
+    if (props.entry) {
+      provide('page-ancestors', pageAncestors)
+      getPageAncestors(pageContext.pageId).then((value) => {
+        pageAncestors.value = value
+      })
+      const cancel = getController().getHistoryDataChanged(() => {
+        const pageIdFromPath = getController().getBaseInfo().pageId
+        pageContext.pageId = props.pageId || pageIdFromPath
+        pageContext.active = props.active || pageIdFromPath === pageContext.pageId
+        getPageAncestors(pageContext.pageId).then((value) => {
+          pageAncestors.value = value
+        })
+      })
+      onUnmounted(() => {
+        cancel()
+      })
+    }
 
     let schema = activeSchema
     let setCurrentSchema
-    if (!props.active) {
+    if (pageContext.pageId && !props.active) {
       const { schema: inActiveSchema, setSchema: setInactiveSchema } = useSchema(pageContext, {
         utils,
         bridge,
@@ -169,15 +197,28 @@ export default defineComponent({
       }
     )
     watch(
-      () => props.active,
-      (active) => {
-        if (!active) {
-          setCurrentSchema(props.renderSchema)
+      [() => props.active, () => props.renderSchema],
+      ([active, renderSchema]) => {
+        if (active) {
+          setCurrentPage({
+            pageId: pageContext.pageId,
+            schema: schema,
+            pageContext: pageContext
+          })
         }
+        if (!active && !props.entry) {
+          setCurrentSchema(renderSchema)
+        }
+      },
+      {
+        immediate: true
       }
     )
-
-    return () => getRenderer()(schema, refreshKey, props.entry)
+    const renderer = getRenderer()
+    return () =>
+      pageAncestors.value === null
+        ? h(CanvasEmpty, { placeholderText: '页面分析加载中' })
+        : renderer(schema, refreshKey, props.entry, props.active, !!pageContext.pageId)
   }
 })
 

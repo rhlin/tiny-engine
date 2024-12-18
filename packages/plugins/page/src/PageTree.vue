@@ -74,8 +74,14 @@ export default {
   setup(props, { emit }) {
     const { confirm } = useModal()
     const { initData, pageState, isBlock, isSaved } = useCanvas()
-    const { pageSettingState, changeTreeData, isCurrentDataSame, STATIC_PAGE_GROUP_ID, COMMON_PAGE_GROUP_ID } =
-      usePage()
+    const {
+      pageSettingState,
+      changeTreeData,
+      isCurrentDataSame,
+      STATIC_PAGE_GROUP_ID,
+      COMMON_PAGE_GROUP_ID,
+      postHistoryChanged
+    } = usePage()
     const { fetchPageList, fetchPageDetail } = http
     const { setBreadcrumbPage } = useBreadcrumb()
     const pageTreeRefs = ref([])
@@ -175,6 +181,7 @@ export default {
       url.searchParams.delete('blockid')
       url.searchParams.set('pageid', id)
       window.history.pushState({}, '', url)
+      postHistoryChanged({ pageId: id })
     }
 
     const getPageDetail = (pageId) => {

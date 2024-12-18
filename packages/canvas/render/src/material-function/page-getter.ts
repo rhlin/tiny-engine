@@ -1,8 +1,7 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import { getController } from '../canvas-function'
 import RenderMain from '../RenderMain'
 import { handleScopedCss } from './handle-scoped-css'
-import { currentPage } from '../canvas-function/page-switcher'
 
 const pageSchema: Record<string, any> = {}
 
@@ -32,21 +31,35 @@ export const wrapPageComponent = (pageId: string) => {
     asyncData.value = data
     initStyle(key, data.css)
   })
-  const isCurrentPage = pageId === currentPage.pageId
   pageSchema[pageId] = defineComponent({
-    name: 'page-${pageId}',
+    name: `page-${pageId}`,
     setup() {
       return () =>
         asyncData.value
           ? h(RenderMain, {
               cssScopeId: key,
-              renderSchema: isCurrentPage ? null : asyncData.value,
-              active: isCurrentPage
+              renderSchema: asyncData.value,
+              active: pageId === getController().getBaseInfo().pageId,
+              pageId: pageId,
+              entry: false
             })
           : null
     }
   })
+  return pageSchema[pageId]
 }
 export const getPage = (pageId: string) => {
   return pageSchema[pageId] || wrapPageComponent(pageId)
+}
+
+export async function getPageAncestors(pageId?: string) {
+  if (!pageId) {
+    return []
+  }
+  if (!getController().getPageAncestors) {
+    // 如果不支持查询祖先 则返回自己
+    return [pageId]
+  }
+  const pageChain = await getController().getPageAncestors(pageId)
+  return [...pageChain, pageId]
 }

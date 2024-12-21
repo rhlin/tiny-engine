@@ -133,7 +133,7 @@
           }
         },
         {
-          "icon": "Router",
+          "icon": "RouterView",
           "name": {
             "zh_CN": "RouterView"
           },
@@ -156,6 +156,79 @@
                 "content": []
               }
             ]
+          }
+        },
+        {
+          "icon": "RouterLink",
+          "name": {
+            "zh_CN": "RouterLink"
+          },
+          "component": "RouterLink",
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "collapse": {
+                  "number": 6,
+                  "text": {
+                    "zh_CN": "显示更多"
+                  }
+                },
+                "content": [
+                  {
+                    "property": "to",
+                    "type": "String",
+                    "label": {
+                      "text": {
+                        "zh_CN": "跳转页面"
+                      }
+                    },
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    }
+                  },
+                  {
+                    "property": "activeClass",
+                    "type": "String",
+                    "label": {
+                      "text": {
+                        "zh_CN": "激活样式类"
+                      }
+                    },
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    }
+                  },
+                  {
+                    "property": "exactActiveClass",
+                    "type": "String",
+                    "label": {
+                      "text": {
+                        "zh_CN": "准确激活样式雷"
+                      }
+                    },
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "configure": {
+            "loop": true,
+            "isContainer": true
           }
         },
         {
@@ -556,6 +629,28 @@
               "schema": {
                 "componentName": "RouterView",
                 "props": {}
+              }
+            },
+            {
+              "name": {
+                "zh_CN": "路由链接"
+              },
+              "screenshot": "",
+              "snippetName": "RouterLink",
+              "icon": "RouterLink",
+              "schema": {
+                "componentName": "RouterLink",
+                "props": {
+                  "to": ""
+                },
+                "children": [
+                  {
+                    "componentName": "Text",
+                    "props": {
+                      "text": "路由文本"
+                    }
+                  }
+                ]
               }
             },
             {

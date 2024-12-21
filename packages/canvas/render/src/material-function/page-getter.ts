@@ -1,4 +1,4 @@
-import { defineComponent, h, onMounted, onUnmounted, ref, watch } from 'vue'
+import { defineComponent, h, onUnmounted, ref, watch } from 'vue'
 import { getController } from '../canvas-function'
 import RenderMain from '../RenderMain'
 import { handleScopedCss } from './handle-scoped-css'

@@ -11,7 +11,8 @@ import {
   CanvasSlot,
   CanvasImg,
   CanvasPlaceholder,
-  CanvasRouterView
+  CanvasRouterView,
+  CanvasRouterLink
 } from '../builtin'
 import { getController } from '../canvas-function/controller'
 import { generateCollection } from './support-collection'
@@ -30,7 +31,8 @@ export const Mapper = {
   CanvasCol,
   CanvasRowColContainer,
   CanvasPlaceholder,
-  RouterView: CanvasRouterView
+  RouterView: CanvasRouterView,
+  RouterLink: CanvasRouterLink
 }
 const getNative = (name) => {
   return window.TinyLowcodeComponent?.[name]

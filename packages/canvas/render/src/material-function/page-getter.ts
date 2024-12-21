@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, h, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getController } from '../canvas-function'
 import RenderMain from '../RenderMain'
 import { handleScopedCss } from './handle-scoped-css'
@@ -27,19 +27,42 @@ export function initStyle(key: string, content: string) {
 export const wrapPageComponent = (pageId: string) => {
   const key = `data-te-page-${pageId}`
   const asyncData = ref(null)
-  fetchPageSchema(pageId).then((data) => {
-    asyncData.value = data
-    initStyle(key, data.css)
-  })
+  const updateSchema = () => {
+    fetchPageSchema(pageId).then((data) => {
+      asyncData.value = data
+      initStyle(key, data.css)
+    })
+  }
+  updateSchema()
   pageSchema[pageId] = defineComponent({
     name: `page-${pageId}`,
     setup() {
+      const active = ref(pageId === getController().getBaseInfo().pageId)
+      const stop = getController().getHistoryDataChanged(() => {
+        const newValue = pageId === getController().getBaseInfo().pageId
+        if (active.value !== newValue) {
+          active.value = newValue
+        }
+      })
+      const watchStop = watch(
+        () => active.value,
+        (activeValue) => {
+          if (!activeValue) {
+            updateSchema()
+          }
+        }
+      )
+      onUnmounted(() => {
+        stop()
+        watchStop()
+      })
+
       return () =>
-        asyncData.value
+        active.value || asyncData.value
           ? h(RenderMain, {
               cssScopeId: key,
               renderSchema: asyncData.value,
-              active: pageId === getController().getBaseInfo().pageId,
+              active: active.value,
               pageId: pageId,
               entry: false
             })

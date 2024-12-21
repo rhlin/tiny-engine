@@ -26,14 +26,18 @@
         ></tiny-input>
       </tiny-form-item>
 
-      <tiny-form-item v-if="pageSettingState.currentPageData.group !== 'publicPages'" label="父文件夹" prop="parentId">
+      <tiny-form-item
+        v-if="pageSettingState.currentPageData.group !== 'publicPages'"
+        label="父文件夹/父页面"
+        prop="parentId"
+      >
         <tiny-select
           v-model="pageSettingState.currentPageData.parentId"
           value-field="id"
           render-type="tree"
           :tree-op="treeFolderOp"
           text-field="name"
-          placeholder="请选择父文件夹"
+          placeholder="请选择父文件夹/父页面"
           popper-class="parent-fold-select-dropdown"
           @change="changeParentForderId"
         ></tiny-select>
@@ -154,39 +158,50 @@ export default {
       group: [{ required: true, message: '必须选择页面类型' }]
     }
 
-    const getFolders = (pages) => {
-      const list = []
+    const pageToTreeData = (page) => {
+      const { id, name, isPage, children } = page
 
-      pages.forEach((page) => {
-        if (!page.isPage && page.id !== pageSettingState.currentPageData.id) {
-          list.push(page)
-          if (!page.children) {
-            page.children = []
-          }
-          page.children = getFolders(page.children)
-        }
-      })
+      if (!Array.isArray(children)) {
+        return { id, name, isPage }
+      }
 
-      return list
+      return {
+        id,
+        name,
+        isPage,
+        children: children
+          .filter((page) => page.id !== pageSettingState.currentPageData.id)
+          .map((page) => pageToTreeData(page))
+      }
+    }
+
+    // TODO 遗留问题：无法收缩下拉面板的树目录。如果使用tree自带的icon，无法动态设置expandIcon和shrinkIcon
+    const getNodeIcon = (data) => {
+      if (data.id === ROOT_ID) {
+        return null
+      }
+
+      if (data.isPage) {
+        return <SvgIcon name="text-page-common"></SvgIcon>
+      }
+
+      return <SvgIcon name="text-page-folder"></SvgIcon>
     }
 
     const treeFolderOp = computed(() => {
-      const expandIcon = <SvgIcon name="text-page-folder-closed" class="folder-icon"></SvgIcon>
-      const shrinkIcon = <SvgIcon name="text-page-folder" class="folder-icon"></SvgIcon>
       const staticPages = pageSettingState.pages[STATIC_PAGE_GROUP_ID]?.data || []
-      const data = [{ name: '无', id: ROOT_ID }, ...getFolders(JSON.parse(JSON.stringify(staticPages)))]
+      const dummyRoot = pageToTreeData({ children: [{ name: '无', id: ROOT_ID }].concat(staticPages) })
+      const data = dummyRoot.children
       const options = {
         data: data,
-        shrinkIcon: shrinkIcon,
-        expandIcon: expandIcon,
+        shrinkIcon: null,
+        expandIcon: null,
         renderContent: (_h, { node, data }) => {
           return (
-            <span style="display:flex">
-              {node.isLeaf && data.id !== ROOT_ID ? (
-                <svg-icon name="text-page-folder-closed" style="margin-right:14px"></svg-icon>
-              ) : null}
-              <span class="label">{node.label}</span>
-            </span>
+            <>
+              {getNodeIcon(data)}
+              <label>{node.label}</label>
+            </>
           )
         }
       }
@@ -277,21 +292,43 @@ export default {
 </style>
 <style lang="less">
 .tiny-select-dropdown.parent-fold-select-dropdown {
-  .tiny-tree {
-    background-color: var(--ti-lowcode-page-manage-tree-text-background-color);
+  padding: 8px 0;
 
+  .tiny-tree {
     .tiny-tree-node {
-      &.is-current {
-        .tiny-tree-node__content {
-          background-color: var(--ti-lowcode-page-manage-tree-node-background-color);
+      .tiny-tree-node__content {
+        padding: 0;
+        background-color: var(--te-common-bg-default);
+        &:hover {
+          background-color: var(--te-common-bg-container);
+        }
+        // 移除子节点的的背景色，才能保证鼠标hover到.tiny-tree-node__content节点任意位置时，整行都有hover状态的背景色
+        .tiny-tree-node__content-left,
+        .tiny-tree-node__content-left .tiny-tree-node__content-box {
+          background-color: unset;
+          &:hover {
+            background-color: unset;
+          }
+        }
+        .tiny-tree-node__content-left {
+          padding: 0;
+          .tree-node-icon {
+            margin: 0;
+          }
+          .tiny-tree-node__content-box {
+            padding: 0 12px;
+            svg {
+              margin-right: 8px;
+            }
+            * {
+              cursor: pointer;
+            }
+          }
+          .tiny-tree-node__label {
+            font-size: 12px;
+          }
         }
       }
-    }
-  }
-
-  .tiny-tree-node__content {
-    &:hover {
-      --ti-lowcode-tree-node-content-hover-bg-color: var(--ti-lowcode-page-manage-tree-node-background-color);
     }
   }
 }

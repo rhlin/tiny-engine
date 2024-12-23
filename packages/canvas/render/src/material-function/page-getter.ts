@@ -84,5 +84,5 @@ export async function getPageAncestors(pageId?: string) {
     return [pageId]
   }
   const pageChain = await getController().getPageAncestors(pageId)
-  return [...pageChain, pageId]
+  return [...pageChain.map((id: number | string) => id + ''), pageId]
 }

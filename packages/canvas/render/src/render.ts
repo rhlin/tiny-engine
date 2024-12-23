@@ -210,7 +210,7 @@ function getRenderPageId(currentPageId, isPageStart) {
 
   function getNextChild(currentPageId) {
     const index = pagePathFromRoot.indexOf(currentPageId)
-    if (index + 1 < pagePathFromRoot.length) {
+    if (index > -1 && index + 1 < pagePathFromRoot.length) {
       return pagePathFromRoot[index + 1]
     }
     return null

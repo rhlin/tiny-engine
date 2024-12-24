@@ -169,7 +169,7 @@ const renderGroup = (children, scope, parent, pageContext) => {
         return null
       }
 
-      const renderChildren = injectPlaceHolder(componentName, children)
+      const renderChildren = pageContext.active ? injectPlaceHolder(componentName, children) : children
 
       return h(
         getComponent(componentName),
@@ -186,7 +186,7 @@ const renderGroup = (children, scope, parent, pageContext) => {
 
 const getChildren = (schema, mergeScope, pageContext) => {
   const { componentName, children } = schema
-  const renderChildren = injectPlaceHolder(componentName, children)
+  const renderChildren = pageContext.active ? injectPlaceHolder(componentName, children) : children
 
   const component = getComponent(componentName)
   const isNative = typeof component === 'string'

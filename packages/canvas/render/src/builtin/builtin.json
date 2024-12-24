@@ -147,12 +147,6 @@
                 "description": {
                   "zh_CN": "基础信息"
                 },
-                "collapse": {
-                  "number": 6,
-                  "text": {
-                    "zh_CN": "显示更多"
-                  }
-                },
                 "content": []
               }
             ]
@@ -172,12 +166,6 @@
                 },
                 "description": {
                   "zh_CN": "基础信息"
-                },
-                "collapse": {
-                  "number": 6,
-                  "text": {
-                    "zh_CN": "显示更多"
-                  }
                 },
                 "content": [
                   {

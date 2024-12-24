@@ -18,9 +18,7 @@ import { collectionMethodsMap } from './material-function'
 import { generateFn } from './data-function'
 
 export const lowcodeWrap = (props, context) => {
-  const global: {
-    [props: string]: any
-  } = {}
+  const global: Record<string, any> = {}
   const instance = getCurrentInstance()
   const router = ''
   const route = ''

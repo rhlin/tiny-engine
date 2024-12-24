@@ -38,7 +38,7 @@ export const wrapPageComponent = (pageId: string) => {
     name: `page-${pageId}`,
     setup() {
       const active = ref(pageId === getController().getBaseInfo().pageId)
-      const stop = getController().getHistoryDataChanged(() => {
+      const stop = getController().addHistoryDataChangedCallback(() => {
         const newValue = pageId === getController().getBaseInfo().pageId
         if (active.value !== newValue) {
           active.value = newValue
@@ -84,5 +84,5 @@ export async function getPageAncestors(pageId?: string) {
     return [pageId]
   }
   const pageChain = await getController().getPageAncestors(pageId)
-  return [...pageChain.map((id: number | string) => id + ''), pageId]
+  return [...pageChain.map((id: number | string) => String(id)), pageId]
 }

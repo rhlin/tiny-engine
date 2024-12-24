@@ -172,26 +172,26 @@ export default {
       canvasResizeObserver?.disconnect?.()
     })
 
-    const { add } = (function () {
-      const cbs = new Set()
+    const { addToCallbackFns: addHistoryDataChangedCallback } = (function () {
+      const callbackFns = new Set()
 
       const { subscribe, unsubscribe } = useMessage()
       const topic = 'historyChanged'
+      const callback = (value) => callbackFns.forEach((cb) => cb(value))
 
-      // 订阅数据改变，处理图表列
       onMounted(() => {
-        subscribe({ topic, callback: (value) => cbs.forEach((cb) => cb(value)) })
+        subscribe({ topic, callback })
       })
 
       onUnmounted(() => {
-        unsubscribe({ topic })
+        unsubscribe({ topic, callback })
       })
-      function add(cb) {
-        cbs.add(cb)
-        return () => cbs.delete(cb)
+      function addToCallbackFns(cb) {
+        callbackFns.add(cb)
+        return () => callbackFns.delete(cb)
       }
       return {
-        add
+        addToCallbackFns
       }
     })()
 
@@ -212,7 +212,7 @@ export default {
         getPageById: getMetaApi(META_APP.AppManage).getPageById,
         getPageAncestors: usePage().getAncestors,
         getBaseInfo: () => getMetaApi(META_SERVICE.GlobalService).getBaseInfo(),
-        getHistoryDataChanged: add,
+        addHistoryDataChangedCallback,
         ast
       },
       CanvasLayout,

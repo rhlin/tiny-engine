@@ -150,7 +150,7 @@ export default defineComponent({
       getPageAncestors(pageContext.pageId).then((value) => {
         pageAncestors.value = value
       })
-      const cancel = getController().getHistoryDataChanged(() => {
+      const cancel = getController().addHistoryDataChangedCallback(() => {
         const pageIdFromPath = getController().getBaseInfo().pageId
         pageContext.pageId = props.pageId || pageIdFromPath
         pageContext.active = props.active || pageIdFromPath === pageContext.pageId

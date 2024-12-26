@@ -100,7 +100,7 @@ export default {
       getPageList,
       STATIC_PAGE_GROUP_ID,
       COMMON_PAGE_GROUP_ID,
-      postHistoryChanged
+      postLocationHistoryChanged
     } = usePage()
     const { fetchPageDetail } = http
     const { setBreadcrumbPage } = useBreadcrumb()
@@ -141,7 +141,7 @@ export default {
       url.searchParams.delete('blockid')
       url.searchParams.set('pageid', id)
       window.history.pushState({}, '', url)
-      postHistoryChanged({ pageId: id })
+      postLocationHistoryChanged({ pageId: id })
     }
 
     const getPageDetail = (pageId) => {

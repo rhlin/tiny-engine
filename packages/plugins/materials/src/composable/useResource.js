@@ -58,7 +58,7 @@ const initPage = (pageInfo) => {
 
     url.searchParams.set('pageid', pageInfo.id)
     window.history.pushState({}, '', url)
-    usePage().postHistoryChanged({ pageId: pageInfo.id })
+    usePage().postLocationHistoryChanged({ pageId: pageInfo.id })
   }
 
   const { id, meta, ...pageSchema } = pageInfo

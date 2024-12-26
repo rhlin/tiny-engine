@@ -176,7 +176,7 @@ export default {
       const callbackFns = new Set()
 
       const { subscribe, unsubscribe } = useMessage()
-      const topic = 'historyChanged'
+      const topic = 'locationHistoryChanged'
       const callback = (value) => callbackFns.forEach((cb) => cb(value))
 
       onMounted(() => {

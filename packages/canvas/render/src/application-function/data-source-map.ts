@@ -37,7 +37,7 @@ export function useDataSourceMap() {
       }
       result.data =
         dataSource.config.type === 'array'
-          ? { items: dataSource?.config?.data, total: dataSource?.config?.data?.length }
+          ? { items: dataSource?.config?.data ?? [], total: dataSource?.config?.data?.length }
           : dataSource?.config?.data
 
       dataSource.load = () => Promise.resolve(result)

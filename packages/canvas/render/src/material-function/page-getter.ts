@@ -30,10 +30,10 @@ export const wrapPageComponent = (pageId: string) => {
   const updateSchema = () => {
     fetchPageSchema(pageId).then((data) => {
       asyncData.value = data
-      initStyle(key, data.css)
+      initStyle(key, data?.css)
     })
   }
-  updateSchema()
+  updateSchema() // 保证加载一份非编辑态schema，减少页面跳转渲染时间
   pageSchema[pageId] = defineComponent({
     name: `page-${pageId}`,
     setup() {
@@ -57,16 +57,18 @@ export const wrapPageComponent = (pageId: string) => {
         watchStop()
       })
 
-      return () =>
-        active.value || asyncData.value
-          ? h(RenderMain, {
-              cssScopeId: key,
-              renderSchema: asyncData.value,
-              active: active.value,
-              pageId: pageId,
-              entry: false
-            })
-          : null
+      return () => {
+        if (active.value || asyncData.value) {
+          h(RenderMain, {
+            cssScopeId: key,
+            renderSchema: asyncData.value,
+            active: active.value,
+            pageId: pageId,
+            entry: false
+          })
+        }
+        return null
+      }
     }
   })
   return pageSchema[pageId]

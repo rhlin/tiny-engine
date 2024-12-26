@@ -10,7 +10,7 @@
  *
  */
 
-import { ref, shallowReactive } from 'vue'
+import { shallowReactive } from 'vue'
 import { utils } from '@opentiny/tiny-engine-utils'
 
 export function useContext() {

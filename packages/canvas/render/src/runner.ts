@@ -22,7 +22,7 @@ interface IExtendsTinyI18nHost extends ITinyI18nHostI18nHost {
   lowcode: typeof lowcode
 }
 
-const dispatch = (name: string, data: { detail: any }) => {
+const dispatch = (name: string, data?: { detail: any }) => {
   window.parent.document.dispatchEvent(new CustomEvent(name, data))
 }
 

@@ -138,12 +138,14 @@ export default defineComponent({
   setup(props) {
     const pageAncestors = (inject('page-ancestors') as Ref<any[]>) || ref(null)
     const pageIdFromPath = getController().getBaseInfo().pageId
-    const pageContext = props.active || !pageIdFromPath ? activePageContext : usePageContext()
+    // 顶层使用activePageContext，区块和页面间切换不受影响(短期方案)，因为页面的pageContext目前非响应式（仅刷新画布执行一次），无法动态切换激活态和非激活态
+    const pageContext = props.active || props.entry ? activePageContext : usePageContext()
     provide('pageContext', pageContext)
 
     pageContext.setContextParent(props.parentContext)
+    // 顶层isPage的判断和pageId耦合了，短期先使得顶层和激活页共用pageId，后续需要增加pageContext.isPage
     pageContext.pageId = props.pageId || pageIdFromPath
-    pageContext.active = props.active || pageIdFromPath === pageContext.pageId
+    pageContext.active = props.active || !pageIdFromPath
     pageContext.setCssScopeId(props.cssScopeId || (props.entry ? null : `data-te-page-${pageContext.pageId}`))
     if (props.entry) {
       provide('page-ancestors', pageAncestors)
@@ -153,7 +155,7 @@ export default defineComponent({
       const cancel = getController().addHistoryDataChangedCallback(() => {
         const pageIdFromPath = getController().getBaseInfo().pageId
         pageContext.pageId = props.pageId || pageIdFromPath
-        pageContext.active = props.active || pageIdFromPath === pageContext.pageId
+        pageContext.active = props.active || !pageIdFromPath
         getPageAncestors(pageContext.pageId).then((value) => {
           pageAncestors.value = value
         })
@@ -164,9 +166,15 @@ export default defineComponent({
     }
 
     let schema = activeSchema
-    let setCurrentSchema
-    if (pageContext.pageId && !props.active) {
-      const { schema: inActiveSchema, setSchema: setInactiveSchema } = useSchema(pageContext, {
+    let setCurrentSchema = setSchema
+    let setCurrentMethod = setMethods
+    if (pageContext.pageId && !props.active && !props.entry) {
+      // 注意顶层使用activeSchema和对应的api
+      const {
+        schema: inActiveSchema,
+        setSchema: setInactiveSchema,
+        setMethods: setInactiveMethods
+      } = useSchema(pageContext, {
         utils,
         bridge,
         stores,
@@ -174,6 +182,7 @@ export default defineComponent({
       })
       schema = inActiveSchema
       setCurrentSchema = setInactiveSchema
+      setCurrentMethod = setInactiveMethods
     }
 
     provide('rootSchema', schema)
@@ -190,35 +199,39 @@ export default defineComponent({
     watch(
       () => schema.methods,
       (value) => {
-        setMethods(value, true)
+        setCurrentMethod(value, true)
       },
       {
         deep: true
       }
     )
-    watch(
-      [() => props.active, () => props.renderSchema],
-      ([active, renderSchema]) => {
-        if (active) {
-          setCurrentPage({
-            pageId: pageContext.pageId,
-            schema: schema,
-            pageContext: pageContext
-          })
+
+    if (!props.entry) {
+      watch(
+        [() => props.active, () => props.renderSchema],
+        ([active, renderSchema]) => {
+          if (active) {
+            setCurrentPage({
+              pageId: pageContext.pageId,
+              schema: schema,
+              pageContext: pageContext
+            })
+          }
+          if (!active && !props.entry) {
+            setCurrentSchema(renderSchema, props.pageId)
+          }
+        },
+        {
+          immediate: true
         }
-        if (!active && !props.entry) {
-          setCurrentSchema(renderSchema, props.pageId)
-        }
-      },
-      {
-        immediate: true
-      }
-    )
+      )
+    }
+
     const renderer = getRenderer()
     return () =>
       pageAncestors.value === null
         ? h(CanvasEmpty, { placeholderText: '页面分析加载中' })
-        : renderer(schema, refreshKey, props.entry, props.active, !!pageContext.pageId)
+        : renderer(schema, refreshKey, props.entry, pageContext.active, !!pageContext.pageId)
   }
 })
 

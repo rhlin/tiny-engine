@@ -207,7 +207,7 @@ export default defineComponent({
           })
         }
         if (!active && !props.entry) {
-          setCurrentSchema(renderSchema)
+          setCurrentSchema(renderSchema, props.pageId)
         }
       },
       {

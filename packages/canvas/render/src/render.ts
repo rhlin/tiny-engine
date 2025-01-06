@@ -77,7 +77,7 @@ const checkGroup = (componentName) => configure[componentName]?.nestingRule?.chi
 const clickCapture = (componentName) => configure[componentName]?.clickCapture !== false
 
 const getBindProps = (schema, scope, context, pageContext) => {
-  const { id, componentName } = schema
+  const { id, componentName, componentType } = schema
   const invalidity = configure[componentName]?.invalidity || []
 
   if (componentName === 'CanvasPlaceholder') {
@@ -88,7 +88,7 @@ const getBindProps = (schema, scope, context, pageContext) => {
   const bindProps = {
     ...parseData(schema.props, scope, context),
     ...(cssScopeId ? { [cssScopeId]: '' } : {}),
-    ...(active ? { [DESIGN_UIDKEY]: id } : {}),
+    ...(active && componentType !== 'PageSection' ? { [DESIGN_UIDKEY]: id } : {}),
     [DESIGN_TAGKEY]: componentName
   }
 
@@ -115,7 +115,7 @@ const getBindProps = (schema, scope, context, pageContext) => {
   delete bindProps.className
 
   // 使画布中元素可拖拽
-  if (active) {
+  if (active && componentType !== 'PageSection') {
     bindProps.draggable = true
   }
 

@@ -10,7 +10,7 @@
  *
  */
 
-import { defineComponent, h, inject, provide } from 'vue'
+import { defineComponent, h, inject, provide, Ref } from 'vue'
 
 import { NODE_UID as DESIGN_UIDKEY, NODE_TAG as DESIGN_TAGKEY, NODE_LOOP as DESIGN_LOOPID } from '../../common'
 import { getDesignMode, DESIGN_MODE } from './canvas-function'

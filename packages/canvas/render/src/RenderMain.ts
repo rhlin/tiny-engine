@@ -10,7 +10,7 @@
  *
  */
 
-import { provide, watch, defineComponent, PropType, ref, inject, onUnmounted } from 'vue'
+import { provide, watch, defineComponent, PropType, ref, inject, onUnmounted, h, Ref } from 'vue'
 
 import { useBroadcastChannel } from '@vueuse/core'
 import { constants } from '@opentiny/tiny-engine-utils'
@@ -22,7 +22,6 @@ import { IPageSchema, useContext, usePageContext, useSchema } from './page-block
 import { api, setCurrentApi } from './canvas-function/canvas-api'
 import { getPageAncestors } from './material-function/page-getter'
 import CanvasEmpty from './canvas-function/CanvasEmpty.vue'
-import { h } from 'vue'
 import { setCurrentPage } from './canvas-function/page-switcher'
 
 const { BROADCAST_CHANNEL } = constants

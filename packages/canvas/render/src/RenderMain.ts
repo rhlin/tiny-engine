@@ -166,7 +166,7 @@ export default defineComponent({
     }
 
     let schema = activeSchema
-    let setCurrentSchema = setSchema
+    let setCurrentSchema
     let setCurrentMethod = setMethods
     if (pageContext.pageId && !props.active && !props.entry) {
       // 注意顶层使用activeSchema和对应的api
@@ -218,7 +218,7 @@ export default defineComponent({
             })
           }
           if (!active && !props.entry) {
-            setCurrentSchema(renderSchema, props.pageId)
+            setCurrentSchema?.(renderSchema, props.pageId)
           }
         },
         {

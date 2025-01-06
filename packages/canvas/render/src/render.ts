@@ -205,13 +205,16 @@ const getChildren = (schema, mergeScope, pageContext) => {
     return parseData(renderChildren, mergeScope, pageContext.context)
   }
 }
+
 function getRenderPageId(currentPageId, isPageStart) {
   const pagePathFromRoot = (inject('page-ancestors') as Ref<any[]>).value
+  const pagePreviewFromCurrentPageChild = (inject('page-preview') as Ref<any[]>).value
+  const fullPath = [...pagePathFromRoot, ...pagePreviewFromCurrentPageChild]
 
   function getNextChild(currentPageId) {
-    const index = pagePathFromRoot.indexOf(currentPageId)
-    if (index > -1 && index + 1 < pagePathFromRoot.length) {
-      return pagePathFromRoot[index + 1]
+    const index = fullPath.indexOf(currentPageId)
+    if (index > -1 && index + 1 < fullPath.length) {
+      return fullPath[index + 1]
     }
     return null
   }
@@ -251,9 +254,18 @@ export const renderer = defineComponent({
     if (ancestors.length && (isPageStart || isRouterView)) {
       const renderPageId = getRenderPageId(pageContext.pageId, isPageStart)
       if (renderPageId) {
+        if (pageContext.active && !isPageStart) {
+          pageContext.setNode(schema, parent)
+        }
         return h(getPage(renderPageId), {
           key: ancestors,
-          [DESIGN_TAGKEY]: `${componentName}`
+          [DESIGN_TAGKEY]: `${componentName}`,
+          ...(pageContext.active && !isPageStart
+            ? {
+                [DESIGN_UIDKEY]: schema.id,
+                draggable: true
+              }
+            : {})
         })
       }
     }

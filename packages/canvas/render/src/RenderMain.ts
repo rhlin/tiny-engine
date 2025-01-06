@@ -23,6 +23,7 @@ import { api, setCurrentApi } from './canvas-function/canvas-api'
 import { getPageAncestors } from './material-function/page-getter'
 import CanvasEmpty from './canvas-function/CanvasEmpty.vue'
 import { setCurrentPage } from './canvas-function/page-switcher'
+import { useRouterPreview } from './canvas-function/router-preview'
 
 const { BROADCAST_CHANNEL } = constants
 
@@ -148,6 +149,7 @@ export default defineComponent({
     pageContext.setCssScopeId(props.cssScopeId || (props.entry ? null : `data-te-page-${pageContext.pageId}`))
     if (props.entry) {
       provide('page-ancestors', pageAncestors)
+      provide('page-preview', useRouterPreview().previewPath)
       getPageAncestors(pageContext.pageId).then((value) => {
         pageAncestors.value = value
       })

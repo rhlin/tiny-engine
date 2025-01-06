@@ -201,6 +201,20 @@ export default {
       }
     })()
 
+    function updatePreviewId(previewId) {
+      const url = new URL(window.location.href)
+      if (previewId) {
+        if (previewId === url.searchParams.get('previewid')) {
+          return
+        }
+        url.searchParams.set('previewid', previewId)
+      } else {
+        url.searchParams.delete('previewid')
+      }
+      window.history.pushState({}, '', url)
+      usePage().postLocationHistoryChanged({ previewId })
+    }
+
     return {
       removeNode,
       canvasSrc,
@@ -219,6 +233,7 @@ export default {
         getPageAncestors: usePage().getAncestors,
         getBaseInfo: () => getMetaApi(META_SERVICE.GlobalService).getBaseInfo(),
         addHistoryDataChangedCallback,
+        updatePreviewId,
         ast
       },
       CanvasLayout,

@@ -206,7 +206,7 @@ export default {
       }
     })()
 
-    function updatePreviewId(previewId) {
+    function updatePreviewId(previewId, replace = false) {
       const url = new URL(window.location.href)
       if (previewId) {
         if (previewId === url.searchParams.get('previewid')) {
@@ -216,9 +216,24 @@ export default {
       } else {
         url.searchParams.delete('previewid')
       }
-      window.history.pushState({}, '', url)
+      if (replace) {
+        window.history.replaceState({}, '', url)
+      } else {
+        window.history.pushState({}, '', url)
+      }
       usePage().postLocationHistoryChanged({ previewId })
     }
+
+    // TODO: 待挪到 getBaseInfo
+    const postUrlChanged = () => {
+      usePage().postLocationHistoryChanged(Object.fromEntries(new URLSearchParams(window.location.search)))
+    }
+    onMounted(() => {
+      window.addEventListener('popstate', postUrlChanged)
+    })
+    onUnmounted(() => {
+      window.removeEventListener('popstate', postUrlChanged)
+    })
 
     return {
       removeNode,

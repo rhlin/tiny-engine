@@ -9,14 +9,10 @@ export function useRouterPreview() {
   const previewFullPath = ref([])
   const previewPath = ref([])
 
-  function goRouterPreview(previewId?: string) {
-    updatePreviewId(previewId)
-  }
-
   async function calcNewPreviewFullPath() {
     if (!pageId.value) {
       if (previewId.value) {
-        updatePreviewId(undefined)
+        updatePreviewId(undefined, true)
         return
       }
       previewFullPath.value = []
@@ -24,7 +20,7 @@ export function useRouterPreview() {
       return
     }
     if (!previewId.value) {
-      previewFullPath.value = await getPageAncestors(previewId.value)
+      previewFullPath.value = await getPageAncestors(pageId.value)
       previewPath.value = []
       return
     }
@@ -35,7 +31,7 @@ export function useRouterPreview() {
       if (fullPath.includes(pageId.value)) {
         previewFullPath.value = fullPath
       } else {
-        updatePreviewId(pageId.value)
+        updatePreviewId(pageId.value, true)
       }
     }
 
@@ -50,6 +46,7 @@ export function useRouterPreview() {
     } else {
       previewFullPath.value = await getPageAncestors(pageId.value)
       previewPath.value = []
+      updatePreviewId(pageId.value, true)
     }
   }
 
@@ -77,7 +74,6 @@ export function useRouterPreview() {
 
   return {
     previewPath,
-    previewFullPath,
-    goRouterPreview
+    previewFullPath
   }
 }

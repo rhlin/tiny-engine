@@ -1,6 +1,7 @@
 <template>
   <span
     v-bind="$attrs"
+    :data-router-target-page-id="to?.name"
     :class="{
       [activeClass]: active,
       [exactActiveClass]: exactActive

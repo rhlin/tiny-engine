@@ -12,7 +12,12 @@
 
 import { defineComponent, h, inject, provide, Ref } from 'vue'
 
-import { NODE_UID as DESIGN_UIDKEY, NODE_TAG as DESIGN_TAGKEY, NODE_LOOP as DESIGN_LOOPID } from '../../common'
+import {
+  NODE_UID as DESIGN_UIDKEY,
+  NODE_TAG as DESIGN_TAGKEY,
+  NODE_LOOP as DESIGN_LOOPID,
+  NODE_INACTIVE_UID
+} from '../../common'
 import { getDesignMode, DESIGN_MODE } from './canvas-function'
 import { parseCondition, parseData, parseLoopArgs } from './data-function'
 import { blockSlotDataMap, getComponent, generateCollection, Mapper, configure } from './material-function'
@@ -88,7 +93,7 @@ const getBindProps = (schema, scope, context, pageContext) => {
   const bindProps = {
     ...parseData(schema.props, scope, context),
     ...(cssScopeId ? { [cssScopeId]: '' } : {}),
-    ...(active ? { [DESIGN_UIDKEY]: id } : {}),
+    ...(active ? { [DESIGN_UIDKEY]: id } : { [NODE_INACTIVE_UID]: id }),
     [DESIGN_TAGKEY]: componentName
   }
 

@@ -17,7 +17,8 @@ import {
   copyObject,
   NODE_UID,
   NODE_TAG,
-  NODE_LOOP
+  NODE_LOOP,
+  NODE_INACTIVE_UID
 } from '../../common'
 import { useCanvas, useLayout, useResource, useTranslate, useMaterial } from '@opentiny/tiny-engine-meta-register'
 import { isVsCodeEnv } from '@opentiny/tiny-engine-common/js/environments'
@@ -119,6 +120,10 @@ export const hoverState = reactive({
   ...initialRectState
 })
 
+export const inactiveHoverState = reactive({
+  ...initialRectState
+})
+
 // 拖拽时的位置状态
 export const lineState = reactive({
   ...initialLineState
@@ -126,6 +131,7 @@ export const lineState = reactive({
 
 export const clearHover = () => {
   Object.assign(hoverState, initialRectState, { slot: null })
+  Object.assign(inactiveHoverState, initialRectState, { slot: null })
 }
 
 export const clearSelect = () => {
@@ -228,6 +234,34 @@ export const getElement = (element) => {
     return element
   } else if (element.parentElement) {
     return getElement(element.parentElement)
+  }
+
+  return undefined
+}
+
+export const getInactiveElement = (element) => {
+  // 如果当前元素是body
+  if (element === element.ownerDocument.body) {
+    return undefined
+  }
+
+  // 如果当前元素是画布的html，返回画布的body
+  if (element === element.ownerDocument.documentElement) {
+    return undefined
+  }
+
+  if (!element || element.nodeType !== 1) {
+    return undefined
+  }
+
+  if (element.getAttribute(NODE_TAG) === 'RouterView') {
+    return undefined
+  }
+
+  if (element.getAttribute(NODE_INACTIVE_UID)) {
+    return element
+  } else if (element.parentElement) {
+    return getInactiveElement(element.parentElement)
   }
 
   return undefined
@@ -542,11 +576,36 @@ const setHoverRect = (element, data) => {
     height,
     top,
     left,
+    element,
     componentName
   })
   return undefined
 }
 
+const setInactiveHoverRect = (element) => {
+  if (!element) {
+    Object.assign(inactiveHoverState, initialRectState, { slot: null })
+    return
+  }
+
+  const componentName = element.getAttribute(NODE_TAG)
+  const id = element.getAttribute(NODE_INACTIVE_UID)
+  const configure = getConfigure(componentName)
+  const rect = getRect(element)
+  const { left, height, top, width } = rect
+
+  inactiveHoverState.configure = configure
+  // 设置元素hover状态
+  Object.assign(inactiveHoverState, {
+    id,
+    width,
+    height,
+    top,
+    left,
+    element,
+    componentName
+  })
+}
 let moveUpdateTimer = null
 
 // 绝对布局
@@ -628,7 +687,7 @@ export const dragMove = (event, isHover) => {
   if (isHover) {
     lineState.position = ''
     setHoverRect(getElement(event.target), null)
-
+    setInactiveHoverRect(getInactiveElement(event.target))
     return
   }
 

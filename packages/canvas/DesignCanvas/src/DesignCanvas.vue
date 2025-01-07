@@ -1,5 +1,8 @@
 <template>
   <component :is="CanvasLayout">
+    <template #header>
+      <component v-if="!isBlock()" :is="CanvasRouteBar"></component>
+    </template>
     <template #container>
       <component
         :is="CanvasContainer.entry"
@@ -52,7 +55,7 @@ export default {
   setup() {
     const registry = getMergeRegistry('canvas')
     const materialsPanel = getMergeMeta('engine.plugins.materials')?.entry
-    const { CanvasBreadcrumb } = registry.components
+    const { CanvasRouteBar, CanvasBreadcrumb } = registry.components
     const CanvasLayout = registry.layout.entry
     const [CanvasContainer] = registry.metas
     const footData = ref([])
@@ -73,6 +76,8 @@ export default {
       pageState.currentSchema = {}
       pageState.properties = null
     }
+
+    const isBlock = useCanvas().isBlock
 
     watch(
       [() => useCanvas().isSaved(), () => useLayout().layoutState.pageStatus, () => useCanvas().getPageSchema()],
@@ -236,9 +241,11 @@ export default {
         updatePreviewId,
         ast
       },
+      isBlock,
       CanvasLayout,
       canvasRef,
       CanvasContainer,
+      CanvasRouteBar,
       CanvasBreadcrumb
     }
   }

@@ -180,7 +180,7 @@
                     },
                     "cols": 12,
                     "widget": {
-                      "component": "InputConfigurator",
+                      "component": "RouterSelectConfigurator",
                       "props": {}
                     }
                   },
@@ -630,9 +630,7 @@
               "icon": "RouterLink",
               "schema": {
                 "componentName": "RouterLink",
-                "props": {
-                  "to": ""
-                },
+                "props": {},
                 "children": [
                   {
                     "componentName": "Text",

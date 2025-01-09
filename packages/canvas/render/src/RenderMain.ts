@@ -11,7 +11,14 @@
  */
 
 import { provide, watch, defineComponent, PropType, ref, inject, onUnmounted, h, Ref } from 'vue'
-import { getDesignMode, setDesignMode, setController, useCustomRenderer, getController } from './canvas-function'
+import {
+  getDesignMode,
+  setDesignMode,
+  setController,
+  useCustomRenderer,
+  getController,
+  useRouterViewSetting
+} from './canvas-function'
 import { removeBlockCompsCache, setConfigure } from './material-function'
 import { useUtils, useBridge, useDataSourceMap, useGlobalState } from './application-function'
 import { IPageSchema, useContext, usePageContext, useSchema } from './page-block-function'
@@ -79,6 +86,9 @@ const throttleUpdateSchema = useThrottleFn(
   true
 )
 
+const pageRenderer = getRenderer()
+const { routerViewSetting } = useRouterViewSetting()
+
 export default defineComponent({
   props: {
     entry: {
@@ -120,22 +130,36 @@ export default defineComponent({
     pageContext.pageId = props.pageId || pageIdFromPath
     pageContext.active = props.active || !pageIdFromPath
     pageContext.setCssScopeId(props.cssScopeId || (props.entry ? null : `data-te-page-${pageContext.pageId}`))
+
     if (props.entry) {
       provide('page-ancestors', pageAncestors)
-      getPageAncestors(pageContext.pageId).then((value) => {
-        pageAncestors.value = value
-      })
+      const updatePageAncestor = () => {
+        if (routerViewSetting.viewMode === 'standalone') {
+          pageAncestors.value = []
+          return
+        }
+        getPageAncestors(pageContext.pageId).then((value) => {
+          pageAncestors.value = value
+        })
+      }
+      updatePageAncestor()
+
       const cancel = getController().addHistoryDataChangedCallback(() => {
         const pageIdFromPath = getController().getBaseInfo().pageId
         pageContext.pageId = props.pageId || pageIdFromPath
         pageContext.active = props.active || !pageIdFromPath
-        getPageAncestors(pageContext.pageId).then((value) => {
-          pageAncestors.value = value
-        })
+        updatePageAncestor()
       })
       onUnmounted(() => {
         cancel()
       })
+
+      watch(
+        () => routerViewSetting.viewMode,
+        () => {
+          updatePageAncestor()
+        }
+      )
 
       window.host.subscribe({
         topic: 'schemaChange',
@@ -245,11 +269,16 @@ export default defineComponent({
       )
     }
 
-    const renderer = getRenderer()
     return () =>
       pageAncestors.value === null
         ? h(CanvasEmpty, { placeholderText: '页面分析加载中' })
-        : renderer(schema, refreshKey, props.entry, pageContext.active, !!pageContext.pageId)
+        : pageRenderer(
+            schema,
+            refreshKey,
+            props.entry,
+            pageContext.active,
+            !!pageContext.pageId && pageAncestors.value.length
+          )
   }
 })
 

@@ -4,16 +4,20 @@ import { constants } from '@opentiny/tiny-engine-utils'
 
 const { BROADCAST_CHANNEL, CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY } = constants
 
-function getCacheValue() {
-  const value = localStorage.getItem(CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY)
-  if (!['embedded', 'standalone'].includes(value)) {
-    return 'embedded'
-  }
-  return value as 'embedded' | 'standalone'
+export enum ViewMode {
+  EMBEDDED = 'embedded',
+  STANDALONE = 'standalone'
+}
+export interface IRouterViewSetting {
+  viewMode: ViewMode
 }
 
-export interface IRouterViewSetting {
-  viewMode: 'embedded' | 'standalone'
+function getCacheValue() {
+  const value = localStorage.getItem(CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY)
+  if (!(Object.values(ViewMode) as string[]).includes(value)) {
+    return 'embedded' as ViewMode.EMBEDDED
+  }
+  return value as ViewMode
 }
 
 export function useRouterViewSetting() {

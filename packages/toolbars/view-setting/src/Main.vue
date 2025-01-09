@@ -18,7 +18,11 @@ import { constants } from '@opentiny/tiny-engine-utils'
 const { BROADCAST_CHANNEL, CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY } = constants
 
 function getCacheValue() {
-  return localStorage.getItem(CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY)
+  const value = localStorage.getItem(CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY)
+  if (!['embedded', 'standalone'].includes(value)) {
+    return 'embedded'
+  }
+  return value
 }
 function setCacheValue(value) {
   localStorage.setItem(CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY, value)
@@ -35,7 +39,7 @@ export default {
     }
   },
   setup() {
-    const viewMode = ref(getCacheValue() || 'embedded')
+    const viewMode = ref(getCacheValue())
     const { post, data } = useBroadcastChannel({ name: BROADCAST_CHANNEL.CanvasRouterViewSetting })
     watch(data, () => {
       viewMode.value = data.value
@@ -63,7 +67,7 @@ export default {
     }
     return {
       viewModeOptions,
-      vieMode: viewMode,
+      viewMode,
       changeViewMode,
       nextViewMode
     }

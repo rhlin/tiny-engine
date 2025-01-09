@@ -12,7 +12,8 @@
         :canvas-src-doc="canvasSrcDoc"
         @remove="removeNode"
         @selected="nodeSelected"
-      ></component>
+      >
+      </component>
     </template>
     <template #footer>
       <component :is="CanvasBreadcrumb" :data="footData"></component>
@@ -208,6 +209,17 @@ export default {
         addToCallbackFns
       }
     })()
+
+    // TODO: 待挪到 getBaseInfo
+    const postUrlChanged = () => {
+      usePage().postLocationHistoryChanged(Object.fromEntries(new URLSearchParams(window.location.search)))
+    }
+    onMounted(() => {
+      window.addEventListener('popstate', postUrlChanged)
+    })
+    onUnmounted(() => {
+      window.removeEventListener('popstate', postUrlChanged)
+    })
 
     return {
       removeNode,

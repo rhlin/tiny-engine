@@ -35,7 +35,7 @@ export default {
     }
   },
   setup() {
-    const viewMode = ref(getCacheValue())
+    const viewMode = ref(getCacheValue() || 'embedded')
     const { post, data } = useBroadcastChannel({ name: BROADCAST_CHANNEL.CanvasRouterViewSetting })
     watch(data, () => {
       viewMode.value = data.value

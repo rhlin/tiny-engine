@@ -17,7 +17,8 @@ import {
   setController,
   useCustomRenderer,
   getController,
-  useRouterViewSetting
+  useRouterViewSetting,
+  useLocale
 } from './canvas-function'
 import { removeBlockCompsCache, setConfigure } from './material-function'
 import { useUtils, useBridge, useDataSourceMap, useGlobalState } from './application-function'
@@ -160,6 +161,8 @@ export default defineComponent({
           updatePageAncestor()
         }
       )
+
+      useLocale()
 
       window.host.subscribe({
         topic: 'schemaChange',

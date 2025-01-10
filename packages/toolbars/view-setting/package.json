@@ -16,7 +16,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/opentiny/tiny-engine",
-    "directory": "packages/toolbars/lang"
+    "directory": "packages/toolbars/view-setting"
   },
   "bugs": {
     "url": "https://github.com/opentiny/tiny-engine/issues"

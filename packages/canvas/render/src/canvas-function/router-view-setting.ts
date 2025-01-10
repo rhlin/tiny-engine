@@ -15,7 +15,7 @@ export interface IRouterViewSetting {
 function getCacheValue() {
   const value = localStorage.getItem(CANVAS_ROUTER_VIEW_SETTING_VIEW_MODE_KEY)
   if (!(Object.values(ViewMode) as string[]).includes(value)) {
-    return 'embedded' as ViewMode.EMBEDDED
+    return ViewMode.EMBEDDED
   }
   return value as ViewMode
 }

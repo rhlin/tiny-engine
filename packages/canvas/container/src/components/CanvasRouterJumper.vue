@@ -83,7 +83,7 @@ export default {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: var(--ti-lowcode-common-text-color-3);
+  background-color: var(--te-common-bg-default);
   cursor: pointer;
   z-index: 3;
   transform: translateX(-80%) translateY(-20%);

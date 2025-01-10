@@ -240,21 +240,15 @@ export const getElement = (element) => {
 }
 
 export const getInactiveElement = (element) => {
-  // 如果当前元素是body
-  if (element === element.ownerDocument.body) {
-    return undefined
-  }
-
-  // 如果当前元素是画布的html，返回画布的body
-  if (element === element.ownerDocument.documentElement) {
-    return undefined
-  }
-
-  if (!element || element.nodeType !== 1) {
-    return undefined
-  }
-
-  if (element.getAttribute(NODE_TAG) === 'RouterView') {
+  if (
+    !element ||
+    element.nodeType !== 1 ||
+    // 如果当前元素是body或者html，需要排除
+    element === element.ownerDocument.body ||
+    element === element.ownerDocument.documentElement ||
+    // 如果当前元素是RouterView, 则有可能是激活元素处于非激活元素里面，需要排除
+    element.getAttribute(NODE_TAG) === 'RouterView'
+  ) {
     return undefined
   }
 

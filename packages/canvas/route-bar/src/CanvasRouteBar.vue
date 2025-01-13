@@ -83,6 +83,9 @@ watch(
  * @param route {Route}
  */
 const handleClickRoute = (route) => {
+  if (!route.isPage) {
+    return
+  }
   switchPageWithConfirm(route.id)
 }
 </script>

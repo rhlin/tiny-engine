@@ -211,9 +211,9 @@ export default {
     })()
 
     // TODO: 待挪到 getBaseInfo
-    const keyMap = Object.keys(getMetaApi(META_SERVICE.GlobalService).getBaseInfo())
+    const baseInfoKeys = Object.keys(getMetaApi(META_SERVICE.GlobalService).getBaseInfo())
     function replaceKey(key) {
-      const existingKey = keyMap.find((eKey) => eKey.toLowerCase() === key.toLowerCase())
+      const existingKey = baseInfoKeys.find((eKey) => eKey.toLowerCase() === key.toLowerCase())
       if (existingKey) {
         return existingKey
       }

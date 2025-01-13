@@ -211,8 +211,20 @@ export default {
     })()
 
     // TODO: 待挪到 getBaseInfo
+    const keyMap = Object.keys(getMetaApi(META_SERVICE.GlobalService).getBaseInfo())
+    function replaceKey(key) {
+      const existingKey = keyMap.find((eKey) => eKey.toLowerCase() === key.toLowerCase())
+      if (existingKey) {
+        return existingKey
+      }
+      return key
+    }
     const postUrlChanged = () => {
-      usePage().postLocationHistoryChanged(Object.fromEntries(new URLSearchParams(window.location.search)))
+      usePage().postLocationHistoryChanged(
+        Object.fromEntries(
+          Array.from(new URLSearchParams(window.location.search)).map(([key, value]) => [replaceKey(key), value])
+        )
+      )
     }
     onMounted(() => {
       window.addEventListener('popstate', postUrlChanged)

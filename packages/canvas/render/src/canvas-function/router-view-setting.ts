@@ -1,4 +1,4 @@
-import { reactive, watch } from 'vue'
+import { onUnmounted, reactive, watch } from 'vue'
 import { useBroadcastChannel } from '@vueuse/core'
 import { constants } from '@opentiny/tiny-engine-utils'
 
@@ -25,12 +25,16 @@ export function useRouterViewSetting() {
     viewMode: getCacheValue()
   })
 
-  const { data } = useBroadcastChannel<IRouterViewSetting, IRouterViewSetting>({
+  const { data, close } = useBroadcastChannel<IRouterViewSetting, IRouterViewSetting>({
     name: BROADCAST_CHANNEL.CanvasRouterViewSetting
   })
 
   watch(data, () => {
     routerViewSetting.viewMode = data.value.viewMode
+  })
+
+  onUnmounted(() => {
+    close()
   })
 
   return {

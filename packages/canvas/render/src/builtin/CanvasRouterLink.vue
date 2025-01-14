@@ -1,7 +1,6 @@
 <template>
   <a
     href="javascript:void(0)"
-    v-bind="$attrs"
     :data-router-target-page-id="to?.name"
     :class="{
       [activeClass]: active,

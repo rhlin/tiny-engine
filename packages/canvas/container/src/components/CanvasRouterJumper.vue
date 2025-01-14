@@ -47,7 +47,7 @@ export default {
     }
 
     watch(
-      [() => props.hoverState, () => props.inactiveHoverState],
+      () => [props.hoverState, props.inactiveHoverState],
       ([hoverState, inactiveHoverState]) => {
         const usedHoverState = [hoverState, inactiveHoverState].find(({ componentName }) =>
           LEGAL_JUMPER_COMPONENT.includes(componentName)

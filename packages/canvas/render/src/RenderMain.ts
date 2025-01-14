@@ -67,8 +67,11 @@ const updateCanvas = () => {
   refreshKey.value++
 }
 setCurrentApi({
+  // 用于lowcode.ts获取utils工具
   getUtils,
+  getDataSourceMap,
   setController,
+  // 设置物料配置
   setConfigure,
   setCondition,
   getRenderer,
@@ -102,7 +105,7 @@ export default defineComponent({
       default: null
     },
     parentContext: {
-      type: Object as PropTye<ReturnType<typeof useContext>>,
+      type: Object as PropType<ReturnType<typeof useContext>>,
       default: null
     },
     renderSchema: {

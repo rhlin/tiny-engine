@@ -17,7 +17,7 @@ export function useSchema(
   const schema = reactive<Partial<IPageSchema>>({})
   const { generateAccessor, stateAccessorMap, propsAccessorMap, generateStateAccessors } = useAccessorMap(globalContext)
 
-  const { state, setState } = useState(schema, {
+  const { state, setState } = useState({
     getContext,
     generateStateAccessors
   })
@@ -90,7 +90,7 @@ export function useSchema(
     const accessorFunctions = initProps(newSchema.schema?.properties)
 
     // 这里setState（会触发画布渲染），是因为状态管理里面的变量会用到props、utils、bridge、stores、methods
-    setState(newSchema.state, true)
+    setState(newSchema.state)
 
     await nextTick()
     setPageCss(data.css, pageId)

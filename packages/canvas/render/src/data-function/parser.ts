@@ -3,7 +3,7 @@ import { transformSync } from '@babel/core'
 import i18nHost from '@opentiny/tiny-engine-i18n-host'
 
 import { globalNotify } from '../canvas-function'
-import { collectionMethodsMap, getComponent, getIcon } from '../material-function'
+import { getComponent, getIcon } from '../material-function'
 import { newFn } from '../data-utils'
 import { renderDefault } from '../render'
 

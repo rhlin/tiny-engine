@@ -129,11 +129,11 @@ export default defineComponent({
     pageContext.setContextParent(props.parentContext)
     // 顶层isPage的判断和pageId耦合了，短期先使得顶层和激活页共用pageId，后续需要增加pageContext.isPage
     pageContext.pageId = props.pageId || pageIdFromPath
-    pageContext.active = props.active || !pageIdFromPath
-    pageContext.setCssScopeId(props.cssScopeId || (props.entry ? null : `data-te-page-${pageContext.pageId}`))
-
+    pageContext.active = props.active || !pageIdFromPath || props.entry
+    pageContext.setCssScopeId(props.cssScopeId || `data-te-page-${pageContext.pageId}`)
     if (props.entry) {
       provide('page-ancestors', pageAncestors)
+
       const updatePageAncestor = () => {
         if (routerViewSetting.viewMode === 'standalone') {
           pageAncestors.value = []

@@ -3,7 +3,7 @@ import { parseData } from '../data-function'
 import type { IFuncType } from '@opentiny/tiny-engine-dsl-vue'
 
 export function useMethods({ getContext, setContext }) {
-  const methods: Record<string, Function> = {}
+  const methods: Record<string, IFuncType> = {}
   const getMethods = () => methods
 
   const setMethods = (data: Record<string, IFuncType> = {}, clear = false) => {

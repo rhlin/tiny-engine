@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import TinyVue from '@opentiny/vue'
 import * as TinyVueIcon from '@opentiny/vue-icon'
-import { generateFunction, reset } from '../data-utils'
+import { generateFunction } from '../data-utils'
 
 export interface IUtil {
   name: string

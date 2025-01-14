@@ -102,7 +102,7 @@ export default defineComponent({
       default: null
     },
     parentContext: {
-      type: Object,
+      type: Object as PropTye<ReturnType<typeof useContext>>,
       default: null
     },
     renderSchema: {
@@ -113,7 +113,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    pageId: String
+    pageId: {
+      type: String,
+      default: null
+    }
   },
   setup(props) {
     const pageAncestors = (inject('page-ancestors') as Ref<any[]>) || ref(null)

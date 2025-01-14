@@ -14,12 +14,15 @@ async function fetchPageSchema(pageId: string) {
 }
 const styleSheetMap = new Map()
 export function initStyle(key: string, content: string) {
-  if (styleSheetMap.get(key) || !content) {
+  if (!content) {
     return
   }
-  const styleSheet = new CSSStyleSheet()
-  styleSheetMap.set(key, styleSheet)
-  document.adoptedStyleSheets.push(styleSheet)
+  let styleSheet = styleSheetMap.get(key)
+  if (!styleSheet) {
+    styleSheet = new CSSStyleSheet()
+    styleSheetMap.set(key, styleSheet)
+    document.adoptedStyleSheets.push(styleSheet)
+  }
   handleScopedCss(key, content).then((scopedCss) => {
     styleSheet.replaceSync(scopedCss)
   })

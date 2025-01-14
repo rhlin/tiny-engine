@@ -95,22 +95,18 @@ export default defineComponent({
     entry: {
       // 页面入口
       type: Boolean,
-      require: false,
       default: true
     },
     cssScopeId: {
       type: String,
-      require: false,
       default: null
     },
     parentContext: {
       type: Object,
-      require: false,
       default: null
     },
     renderSchema: {
       type: Object as PropType<IPageSchema>,
-      require: false,
       default: null
     },
     active: {

@@ -10,7 +10,7 @@
  *
  */
 
-import { provide, watch, defineComponent, PropType, ref, inject, onUnmounted, h, Ref } from 'vue'
+import { provide, watch, defineComponent, ref, inject, onUnmounted, h, type PropType, type Ref } from 'vue'
 import {
   getDesignMode,
   setDesignMode,

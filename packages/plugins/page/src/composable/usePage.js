@@ -406,13 +406,13 @@ const getFamily = async (id) => {
     await getPageList()
   }
 
-  const familytPages = getAncestorsRecursively(id)
+  const familyPages = getAncestorsRecursively(id)
     .filter((item) => item.isPage)
     .reverse()
 
-  await handlePageDetail(familytPages)
+  await handlePageDetail(familyPages)
 
-  return familytPages
+  return familyPages
 }
 
 export default () => {

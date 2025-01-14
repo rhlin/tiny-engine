@@ -25,7 +25,7 @@ export type IInnerCanvasAPI = IApplicationFunctionAPI & IPageFunctionAPI & ICanv
 
 let currentApi: IInnerCanvasAPI
 
-export function setCurrentApi(activeApi) {
+export function setCurrentApi(activeApi: IInnerCanvasAPI) {
   currentApi = activeApi
 }
 

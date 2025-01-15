@@ -149,8 +149,8 @@ export default defineComponent({
 
       const cancel = getController().addHistoryDataChangedCallback(() => {
         const pageIdFromPath = getController().getBaseInfo().pageId
-        pageContext.pageId = props.pageId || pageIdFromPath
-        pageContext.active = props.active || !pageIdFromPath
+        pageContext.pageId = pageIdFromPath
+        pageContext.setCssScopeId(`data-te-page-${pageContext.pageId}`)
         updatePageAncestor()
       })
       onUnmounted(() => {

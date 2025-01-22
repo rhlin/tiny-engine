@@ -39,6 +39,10 @@ const appSchemaState = reactive({
 })
 
 function goPage(pageId) {
+  if (!pageId) {
+    return
+  }
+
   const url = new URL(window.location)
 
   url.searchParams.set('pageid', pageId)

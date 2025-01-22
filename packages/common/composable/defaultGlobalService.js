@@ -6,6 +6,7 @@ const getBaseInfo = () => {
   const id = paramsMap.get('id')
   const blockId = paramsMap.get('blockid')
   const pageId = paramsMap.get('pageid')
+  const previewId = paramsMap.get('previewid')
   const type = paramsMap.get('type')
   const version = paramsMap.get('version')
 
@@ -13,6 +14,7 @@ const getBaseInfo = () => {
     type: type || 'app',
     id,
     pageId,
+    previewId,
     blockId,
     version
   }

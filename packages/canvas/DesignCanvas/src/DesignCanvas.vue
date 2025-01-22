@@ -247,6 +247,24 @@ export default {
       })
     })
 
+    function updatePreviewId(previewId, replace = false) {
+      const url = new URL(window.location.href)
+      if (previewId) {
+        if (previewId === url.searchParams.get('previewid')) {
+          return
+        }
+        url.searchParams.set('previewid', previewId)
+      } else {
+        url.searchParams.delete('previewid')
+      }
+      if (replace) {
+        window.history.replaceState({}, '', url)
+      } else {
+        window.history.pushState({}, '', url)
+      }
+      usePage().postLocationHistoryChanged({ previewId })
+    }
+
     return {
       removeNode,
       canvasSrc,
@@ -264,6 +282,7 @@ export default {
         getPageAncestors: usePage().getAncestors,
         getBaseInfo: () => getMetaApi(META_SERVICE.GlobalService).getBaseInfo(),
         addHistoryDataChangedCallback,
+        updatePreviewId,
         ast,
         getBlockByName: useMaterial().getBlockByName,
         useModal,
